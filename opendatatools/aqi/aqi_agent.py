@@ -3,8 +3,8 @@
 from bs4 import BeautifulSoup
 import pandas as pd
 
-from opendata.common import RestAgent
-from opendata.aqi.constant import city_code_map
+from opendatatools.common import RestAgent
+from opendatatools.aqi.constant import city_code_map
 
 
 class AQIAgent(RestAgent):

@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 from setuptools import setup, find_packages
-from opendata import __version__ as ver
+from opendatatools import __version__ as ver
 import codecs
 import os
 
