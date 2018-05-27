@@ -16,7 +16,11 @@ class RestAgent():
         self.session.headers['User-Agent'] = self.user_agent
 
     def do_request(self, url, param, proxies):
-        res = self.session.get(url, params=param, proxies=proxies)
+        if proxies is None:
+            res = self.session.get(url, params=param)
+        else:
+            res = self.session.get(url, params=param, proxies=proxies)
+
         if res.status_code != 200:
             return None
         else:

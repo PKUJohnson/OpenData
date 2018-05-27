@@ -84,11 +84,77 @@ class AQIAgent(RestAgent):
             print(data)
             aqi_result.extend(data)
 
-        return pd.DataFrame(aqi_result)
+        df = pd.DataFrame(aqi_result)
+        if (len(df)) > 0:
+            df.columns = ['date','city', 'aqi', 'code', 'level', 'indicator']
+        return df
 
-    '''
-    def get_daily_aqi_onecity(self, city, start_date, end_date):
-        aqi_result = dict()
+    def get_hour_aqi(self, date):
+        url = "http://datacenter.mep.gov.cn/websjzx/report/list.vm"
+        page_no = 0
+        aqi_result = list()
+
+        while True:
+            page_no = page_no + 1
+            # 1. 分页爬取数据
+            data = {
+                'pageNum': page_no,
+                'V_DATE': date,
+                'xmlname': 1512478367400,
+                'roleType': 'CFCD2084',
+            }
+
+            rsp = self.do_request(url, data, self.proxies)
+
+            if rsp is None:
+                return None
+
+            data = list()
+            soup = BeautifulSoup(rsp)
+            divs = soup.find_all('div')
+
+            for div in divs:
+                if div.has_key('class') and 'report_main' in div['class']:
+                    rows = div.table.findAll('tr')
+                    for row in rows:
+                        cols = row.findAll('td')
+                        if len(cols) == 9:
+                            city      = cols[3].text
+                            aqi       = cols[4].text
+                            indicator = cols[5].text
+                            date      = cols[6].text
+                            code      = cols[7].text
+                            level     = cols[8].text
+                            data.append ({
+                                "date"  : date,
+                                "city"  : city,
+                                "aqi"   : aqi,
+                                "code"  : code,
+                                "level" : level,
+                                "indicator" : indicator,
+                            })
+
+            if len(data) == 0:
+                break;
+
+            print(data)
+            aqi_result.extend(data)
+
+        df = pd.DataFrame(aqi_result)
+        if (len(df)) > 0:
+            df.columns = ['date','city', 'aqi', 'code', 'level', 'indicator']
+        return df
+
+
+    def get_daily_aqi_onecity(self, city):
+        url = 'http://datacenter.mep.gov.cn/websjzx/report/list.vm'
+        if city not in city_code_map:
+            print("this city is not ready !" + city)
+            return None
+
+        city_code = city_code_map[city]
+
+        aqi_result = list()
         page_no = 0
 
         while True:
@@ -96,45 +162,106 @@ class AQIAgent(RestAgent):
 
             # 1. 分页爬取数据
             data = {
-                'page.pageNo': page_no,
-                'CITY': city,
-                'V_DATE': start_date,
-                'E_DATE': end_date,
-                'xmlname': 1462259560614
+                'pageNum': page_no,
+                'citycodes': city_code,
+                'citytime': "2000-01-01",
+                'xmlname': "1513844769596kqzllb"
             }
 
-            res = self.do_request(self.url, params=data)
-            if res.status_code != 200:
-                print("query_error, status_code = ", res.status_code)
-                return None
-
-            rsp = res.text
+            rsp = self.do_request(url, data, self.proxies)
 
             # 2. 开始解析返回数据，并从html中提取需要的内容
-            data = dict()
+            data = list()
             soup = BeautifulSoup(rsp)
             divs = soup.find_all('div')
 
             for div in divs:
                 if div.has_key('class') and 'report_main' in div['class']:
-                    rows = div.table.tbody.findAll('tr')
+                    rows = div.table.findAll('tr')
                     for row in rows:
                         cols = row.findAll('td')
-                        if len(cols) == 9:
-                            data[cols[6].text] = cols[3].text
-
+                        if len(cols) == 7:
+                            date = cols[1].text
+                            aqi  = cols[3].text
+                            level = cols[5].text
+                            indicator = cols[4].text
+                            data.append({
+                                "date" : date,
+                                "aqi"  : aqi,
+                                "level" : level,
+                                "indicator" : indicator,
+                            })
             if len(data) == 0:
                 break;
 
-            aqi_result.update(data)
+            aqi_result.extend(data)
 
-        session.close()
-        return aqi_result
+        df = pd.DataFrame(aqi_result)
+        if (len(df)) > 0:
+            df.columns = ['date', 'aqi', 'level', 'indicator']
+        return df
 
-    '''
+    def get_hour_aqi_onecity(self, city, date):
+        url = 'http://datacenter.mep.gov.cn/websjzx/report/list.vm'
+        if city not in city_code_map:
+            print("this city is not ready !" + city)
+            return None
+
+        city_code = city_code_map[city]
+
+        aqi_result = list()
+        page_no = 0
+
+        while True:
+            page_no = page_no + 1
+
+            # 1. 分页爬取数据
+            data = {
+                'pageNum': page_no,
+                'ctiycodes': city_code,
+                'citytime': date,
+                'xmlname': "1511257916552",
+                "queryflag": "close",
+                "customquery": "false",
+                "isdesignpatterns": "false",
+            }
+
+            rsp = self.do_request(url, data, self.proxies)
+
+            # 2. 开始解析返回数据，并从html中提取需要的内容
+            data = list()
+            soup = BeautifulSoup(rsp)
+            divs = soup.find_all('div')
+
+            for div in divs:
+                if div.has_key('class') and 'report_main' in div['class']:
+                    rows = div.table.findAll('tr')
+                    for row in rows:
+                        cols = row.findAll('td')
+                        if len(cols) == 7:
+                            time = cols[2].text
+                            aqi  = cols[4].text
+                            city = cols[3].text
+                            level = cols[5].text
+                            indicator = cols[6].text
+                            data.append({
+                                "time" : time,
+                                "aqi"  : aqi,
+                                "city" : city,
+                                "level" : level,
+                                "indicator" : indicator,
+                            })
+            if len(data) < 10:
+                break;
+
+            aqi_result.extend(data)
+
+        df = pd.DataFrame(aqi_result)
+        if (len(df)) > 0:
+            df.columns = ['time', 'aqi', 'city', 'level', 'indicator']
+        return df
 
 if __name__ == '__main__':
     aqi = AQIAgent()
-    result = aqi.get_daily_aqi('2018-02-26')
-    result.to_csv("1.csv")
+    result = aqi.get_hour_aqi_onecity('北京市','2018-05-26')
     print(result)
