@@ -2,6 +2,7 @@
 
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 
 from opendatatools.common import RestAgent
 from opendatatools.aqi.constant import city_code_map
@@ -10,6 +11,27 @@ from opendatatools.aqi.constant import city_code_map
 class AQIAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
+
+        '''
+        df_proxy = self.get_proxy_list()
+        if df_proxy is None:
+            self.proxies = None
+        else:
+            rand_num = np.random.randint(100)
+
+            df1  = df_proxy[df_proxy['Type'] == "HTTP"]
+            df2 = df_proxy[df_proxy['Type'] == "HTTPS"]
+
+            pos1  = rand_num % len(df1)
+            pos2 = rand_num % len(df2)
+
+            url1 = "http://"  + df1.iat[pos1, 0] + ":" + df1.iat[pos1, 1]
+            url2 = "https://" + df2.iat[pos2, 0] + ":" + df2.iat[pos2, 1]
+            self.proxies = {"http" : url1, "https" : url2}
+        '''
+
+        #self.proxies = {"http": "http://183.95.80.168:80"}
+        self.proxies = None
 
     def get_daily_aqi(self, date):
         url = "http://datacenter.mep.gov.cn/websjzx/report/list.vm"
@@ -26,7 +48,7 @@ class AQIAgent(RestAgent):
                 'roleType': 'CFCD2084',
             }
 
-            rsp = self.do_request(url, data)
+            rsp = self.do_request(url, data, self.proxies)
 
             if rsp is None:
                 return None
@@ -59,6 +81,7 @@ class AQIAgent(RestAgent):
             if len(data) == 0:
                 break;
 
+            print(data)
             aqi_result.extend(data)
 
         return pd.DataFrame(aqi_result)
