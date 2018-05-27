@@ -21,7 +21,7 @@ setup(
     include_package_data=True,
     #package_data={'': ['*.json', '*.css', '*.html']},
     # Package Information
-    name='OpenData',
+    name='OpenDataTools',
     url='https://github.com/PKUJohnson/OpenData',
     version=ver,
         license='Apache 2.0',
