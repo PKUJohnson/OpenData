@@ -227,10 +227,11 @@ class AQIAgent(RestAgent):
                                 "level" : level,
                                 "indicator" : indicator,
                             })
-            if len(data) < 10:
-                break;
 
             aqi_result.extend(data)
+
+            if len(data) < 10:
+                break;
 
         df = pd.DataFrame(aqi_result)
         return df
