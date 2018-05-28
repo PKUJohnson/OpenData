@@ -7,8 +7,18 @@ aqi_agent = AQIAgent()
 
 def get_hour_aqi(time = None):
     if time is None:
-        time = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:00:00")
-    return aqi_agent.get_hour_aqi(time)
+        i = 0
+        while i < 3:
+            pub_time = datetime.datetime.now() - datetime.timedelta(hours=i)
+            time = datetime.datetime.strftime(pub_time, "%Y-%m-%d %H:00:00")
+            df_aqi = aqi_agent.get_hour_aqi(time)
+            if len(df_aqi) > 0:
+                return df_aqi
+            i = i + 1
+        return None
+
+    else:
+        return aqi_agent.get_hour_aqi(time)
 
 def get_hour_aqi_onecity(city, date = None):
     if date is None:
