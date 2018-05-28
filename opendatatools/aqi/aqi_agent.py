@@ -117,7 +117,6 @@ class AQIAgent(RestAgent):
             if len(data) == 0:
                 break;
 
-            print(data)
             aqi_result.extend(data)
 
         df = pd.DataFrame(aqi_result)
