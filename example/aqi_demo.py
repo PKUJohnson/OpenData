@@ -12,4 +12,4 @@ from opendatatools import aqi
 #获取单个城市某日的AQI小时数据
 aqi_hour = aqi.get_hour_aqi_onecity('北京市', '2018-05-26')
 aqi_hour.set_index('time', inplace=True)
-aqi_hour
+print(aqi_hour)

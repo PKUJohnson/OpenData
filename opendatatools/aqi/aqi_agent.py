@@ -7,7 +7,6 @@ import numpy as np
 from opendatatools.common import RestAgent
 from opendatatools.aqi.constant import city_code_map
 
-
 class AQIAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
@@ -37,11 +36,11 @@ class AQIAgent(RestAgent):
                 return None
 
             data = list()
-            soup = BeautifulSoup(rsp)
+            soup = BeautifulSoup(rsp, "html5lib")
             divs = soup.find_all('div')
 
             for div in divs:
-                if div.has_key('class') and 'report_main' in div['class']:
+                if div.has_attr('class') and 'report_main' in div['class']:
                     rows = div.table.findAll('tr')
                     for row in rows:
                         cols = row.findAll('td')
@@ -90,11 +89,11 @@ class AQIAgent(RestAgent):
                 return None
 
             data = list()
-            soup = BeautifulSoup(rsp)
+            soup = BeautifulSoup(rsp, "html5lib")
             divs = soup.find_all('div')
 
             for div in divs:
-                if div.has_key('class') and 'report_main' in div['class']:
+                if div.has_attr('class') and 'report_main' in div['class']:
                     rows = div.table.findAll('tr')
                     for row in rows:
                         cols = row.findAll('td')
@@ -150,11 +149,11 @@ class AQIAgent(RestAgent):
 
             # 2. 开始解析返回数据，并从html中提取需要的内容
             data = list()
-            soup = BeautifulSoup(rsp)
+            soup = BeautifulSoup(rsp, "html5lib")
             divs = soup.find_all('div')
 
             for div in divs:
-                if div.has_key('class') and 'report_main' in div['class']:
+                if div.has_attr('class') and 'report_main' in div['class']:
                     rows = div.table.findAll('tr')
                     for row in rows:
                         cols = row.findAll('td')
@@ -206,11 +205,11 @@ class AQIAgent(RestAgent):
 
             # 2. 开始解析返回数据，并从html中提取需要的内容
             data = list()
-            soup = BeautifulSoup(rsp)
+            soup = BeautifulSoup(rsp, "html5lib")
             divs = soup.find_all('div')
 
             for div in divs:
-                if div.has_key('class') and 'report_main' in div['class']:
+                if div.has_attr('class') and 'report_main' in div['class']:
                     rows = div.table.findAll('tr')
                     for row in rows:
                         cols = row.findAll('td')
