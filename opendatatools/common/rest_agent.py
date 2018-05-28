@@ -14,6 +14,7 @@ class RestAgent():
         # simulate http request
         self.session = requests.Session()
         self.session.headers['User-Agent'] = self.user_agent
+        self.session.headers['X-Forwarded-For'] = ':'.join('{0:x}'.format(np.random.randint(0, 2**16 - 1)) for i in range(4)) + ':1'
 
     def do_request(self, url, param, proxies):
         if proxies is None:
@@ -66,5 +67,4 @@ class RestAgent():
 if __name__ == '__main__':
     aqi = RestAgent()
     result = aqi.get_proxy_list()
-    #result.to_csv("1.csv")
     print(result)

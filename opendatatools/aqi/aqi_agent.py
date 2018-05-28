@@ -11,27 +11,10 @@ from opendatatools.aqi.constant import city_code_map
 class AQIAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
-
-        '''
-        df_proxy = self.get_proxy_list()
-        if df_proxy is None:
-            self.proxies = None
-        else:
-            rand_num = np.random.randint(100)
-
-            df1  = df_proxy[df_proxy['Type'] == "HTTP"]
-            df2 = df_proxy[df_proxy['Type'] == "HTTPS"]
-
-            pos1  = rand_num % len(df1)
-            pos2 = rand_num % len(df2)
-
-            url1 = "http://"  + df1.iat[pos1, 0] + ":" + df1.iat[pos1, 1]
-            url2 = "https://" + df2.iat[pos2, 0] + ":" + df2.iat[pos2, 1]
-            self.proxies = {"http" : url1, "https" : url2}
-        '''
-
-        #self.proxies = {"http": "http://183.95.80.168:80"}
         self.proxies = None
+
+    def handle_visit_limit(self):
+        url = ""
 
     def get_daily_aqi(self, date):
         url = "http://datacenter.mep.gov.cn/websjzx/report/list.vm"
@@ -81,12 +64,9 @@ class AQIAgent(RestAgent):
             if len(data) == 0:
                 break;
 
-            print(data)
             aqi_result.extend(data)
 
         df = pd.DataFrame(aqi_result)
-        if (len(df)) > 0:
-            df.columns = ['date','city', 'aqi', 'code', 'level', 'indicator']
         return df
 
     def get_hour_aqi(self, date):
@@ -141,8 +121,6 @@ class AQIAgent(RestAgent):
             aqi_result.extend(data)
 
         df = pd.DataFrame(aqi_result)
-        if (len(df)) > 0:
-            df.columns = ['date','city', 'aqi', 'code', 'level', 'indicator']
         return df
 
 
@@ -197,8 +175,6 @@ class AQIAgent(RestAgent):
             aqi_result.extend(data)
 
         df = pd.DataFrame(aqi_result)
-        if (len(df)) > 0:
-            df.columns = ['date', 'aqi', 'level', 'indicator']
         return df
 
     def get_hour_aqi_onecity(self, city, date):
@@ -257,8 +233,6 @@ class AQIAgent(RestAgent):
             aqi_result.extend(data)
 
         df = pd.DataFrame(aqi_result)
-        if (len(df)) > 0:
-            df.columns = ['time', 'aqi', 'city', 'level', 'indicator']
         return df
 
 if __name__ == '__main__':
