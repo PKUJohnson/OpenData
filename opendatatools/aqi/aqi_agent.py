@@ -68,7 +68,7 @@ class AQIAgent(RestAgent):
         df = pd.DataFrame(aqi_result)
         return df
 
-    def get_hour_aqi(self, date):
+    def get_hour_aqi(self, time):
         url = "http://datacenter.mep.gov.cn/websjzx/report/list.vm"
         page_no = 0
         aqi_result = list()
@@ -78,9 +78,10 @@ class AQIAgent(RestAgent):
             # 1. 分页爬取数据
             data = {
                 'pageNum': page_no,
-                'V_DATE': date,
-                'xmlname': 1512478367400,
+                'xmlname': 1512382906122,
                 'roleType': 'CFCD2084',
+                'V_DATE': time,
+                'E_DATE'  : time,
             }
 
             rsp = self.do_request(url, data, self.proxies)
@@ -97,15 +98,15 @@ class AQIAgent(RestAgent):
                     rows = div.table.findAll('tr')
                     for row in rows:
                         cols = row.findAll('td')
-                        if len(cols) == 9:
-                            city      = cols[3].text
-                            aqi       = cols[4].text
-                            indicator = cols[5].text
-                            date      = cols[6].text
-                            code      = cols[7].text
-                            level     = cols[8].text
+                        if len(cols) == 8:
+                            city      = cols[2].text
+                            aqi       = cols[3].text
+                            indicator = cols[4].text
+                            time      = cols[5].text
+                            code      = cols[6].text
+                            level     = cols[7].text
                             data.append ({
-                                "date"  : date,
+                                "time"  : time,
                                 "city"  : city,
                                 "aqi"   : aqi,
                                 "code"  : code,
@@ -121,7 +122,6 @@ class AQIAgent(RestAgent):
 
         df = pd.DataFrame(aqi_result)
         return df
-
 
     def get_daily_aqi_onecity(self, city):
         url = 'http://datacenter.mep.gov.cn/websjzx/report/list.vm'
