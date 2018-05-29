@@ -9,7 +9,7 @@ def get_lgt_share(market = 'SH', date = None):
     if date is None:
         i = 0
         while i < 5:
-            pub_time = datetime.datetime.now() - datetime.timedelta(hours=i)
+            pub_time = datetime.datetime.now() - datetime.timedelta(days=i)
             date = datetime.datetime.strftime(pub_time, "%Y-%m-%d")
             df = hkex_agent.get_lgt_share(market, date)
             if len(df) > 0:
