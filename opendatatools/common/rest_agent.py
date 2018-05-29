@@ -16,16 +16,42 @@ class RestAgent():
         self.session.headers['User-Agent'] = self.user_agent
         self.session.headers['X-Forwarded-For'] = ':'.join('{0:x}'.format(np.random.randint(0, 2**16 - 1)) for i in range(4)) + ':1'
 
-    def do_request(self, url, param, proxies):
+    def add_headers(self, dict):
+        self.session.headers.update(dict)
+
+    def get_cookies(self):
+        return self.session.cookies
+
+    def do_request(self, url, param = None, proxies = None, method="GET"):
         if proxies is None:
-            res = self.session.get(url, params=param)
+            if method == "GET":
+                res = self.session.get(url, params=param)
+            else:
+                res = self.session.post(url, data=param)
         else:
-            res = self.session.get(url, params=param, proxies=proxies)
+            if method == "GET":
+                res = self.session.get(url, params=param, proxies=proxies)
+            else:
+                res = self.session.post(url, data=param, proxies=proxies)
 
         if res.status_code != 200:
             return None
         else:
             return res.text
+
+    def get_aspx_param(self, url):
+        html = self.do_request(url)
+        bsObj = BeautifulSoup(html, 'html5lib')
+        __VIEWSTATE          = bsObj.find('input', {'id': '__VIEWSTATE'}).attrs['value']
+        __EVENTVALIDATION    = bsObj.find('input', {'id': '__EVENTVALIDATION'}).attrs['value']
+        __VIEWSTATEGENERATOR = bsObj.find('input', {'id' : '__VIEWSTATEGENERATOR'}).attrs['value']
+
+        data = {
+            "__VIEWSTATE"            : __VIEWSTATE,
+            "__EVENTVALIDATION"     : __EVENTVALIDATION,
+            "__VIEWSTATEGENERATOR"  : __VIEWSTATEGENERATOR,
+        }
+        return data
 
     def get_proxy_list(self):
         url = "http://www.mimiip.com/gngao/"

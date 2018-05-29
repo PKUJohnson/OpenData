@@ -34,8 +34,14 @@ if __name__ == '__main__':
               title_pos="center", width=1000,
               height=600, background_color='#404a59')
     attr, value = geo.cast(data)
-    geo.add("", attr, value, visual_range=[0, 200], maptype='china',visual_text_color="#fff",
-            symbol_size=10, is_visualmap=True)
+    geo.add("", attr, value,
+            visual_range=[0, 200], maptype='china',visual_text_color="#fff",
+            symbol_size=10, is_visualmap=True,
+            label_formatter='{b}',  # 指定 label 只显示城市名
+            tooltip_formatter='{c}',  # 格式：经度、纬度、值
+            label_emphasis_textsize=15,  # 指定标签选中高亮时字体大小
+            label_emphasis_pos='right'  # 指定标签选中高亮时字体位置
+        )
 
     geo.render("aqi.html")
 
