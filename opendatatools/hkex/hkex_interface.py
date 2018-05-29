@@ -5,6 +5,9 @@ from .hkex_agent import HKExAgent
 
 hkex_agent = HKExAgent()
 
+def set_proxies(proxies):
+    hkex_agent.set_proxies(proxies)
+
 def get_lgt_share(market = 'SH', date = None):
     if date is None:
         i = 0

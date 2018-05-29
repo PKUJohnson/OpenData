@@ -9,7 +9,6 @@ from opendatatools.aqi.constant import city_code_map
 class HKExAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
-        self.proxies = None
 
     @staticmethod
     def clear_text(text):

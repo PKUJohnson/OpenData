@@ -15,6 +15,7 @@ class RestAgent():
         self.session = requests.Session()
         self.session.headers['User-Agent'] = self.user_agent
         self.session.headers['X-Forwarded-For'] = ':'.join('{0:x}'.format(np.random.randint(0, 2**16 - 1)) for i in range(4)) + ':1'
+        self.proxies = None
 
     def add_headers(self, dict):
         self.session.headers.update(dict)
@@ -22,17 +23,20 @@ class RestAgent():
     def get_cookies(self):
         return self.session.cookies
 
-    def do_request(self, url, param = None, proxies = None, method="GET"):
-        if proxies is None:
+    def set_proxies(self, proxies):
+        self.proxies = proxies
+
+    def do_request(self, url, param = None, method="GET"):
+        if self.proxies is None:
             if method == "GET":
                 res = self.session.get(url, params=param)
             else:
                 res = self.session.post(url, data=param)
         else:
             if method == "GET":
-                res = self.session.get(url, params=param, proxies=proxies)
+                res = self.session.get(url, params=param, proxies=self.proxies)
             else:
-                res = self.session.post(url, data=param, proxies=proxies)
+                res = self.session.post(url, data=param, proxies=self.proxies)
 
         if res.status_code != 200:
             return None

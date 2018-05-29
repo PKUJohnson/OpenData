@@ -10,7 +10,6 @@ from opendatatools.aqi.constant import city_code_map
 class AQIAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
-        self.proxies = None
 
     def handle_visit_limit(self):
         url = ""

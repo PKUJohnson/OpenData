@@ -5,6 +5,9 @@ from .aqi_agent import AQIAgent
 
 aqi_agent = AQIAgent()
 
+def set_proxies(proxies):
+    aqi_agent.set_proxies(proxies)
+
 def get_hour_aqi(time = None):
     if time is None:
         i = 0
