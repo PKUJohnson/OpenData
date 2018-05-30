@@ -2,4 +2,4 @@
 
 from .stock_interface import *
 
-__all__ = ['get_index_list']
+__all__ = ['get_index_list', 'get_index_component']

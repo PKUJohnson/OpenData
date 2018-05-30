@@ -31,6 +31,21 @@ class SHExAgent(RestAgent):
         else:
             return None
 
+    def get_index_component(self, index):
+        url = 'http://query.sse.com.cn/commonSoaQuery.do'
+        data = {
+            'sqlId': 'DB_SZZSLB_CFGLB',
+            'indexCode' : index,
+        }
+
+        response = self.do_request(url, data)
+        rsp = json.loads(response)
+
+        if 'pageHelp' in rsp:
+            data = rsp['pageHelp']['data']
+            return pd.DataFrame(data)
+        else:
+            return None
 
 class SZExAgent(RestAgent):
     def __init__(self):
@@ -41,6 +56,18 @@ class SZExAgent(RestAgent):
         data = {
             'SHOWTYPE'  : 'xls',
             'CATALOGID' : '1812',
+        }
+
+        response = self.do_request(url, data, method='GET', type='binary')
+        df = pd.read_excel(io.BytesIO(response))
+        return df
+
+    def get_index_component(self, index):
+        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        data = {
+            'SHOWTYPE': 'xls',
+            'CATALOGID': '1747',
+            'ZSDM' : index
         }
 
         response = self.do_request(url, data, method='GET', type='binary')
