@@ -26,7 +26,7 @@ class RestAgent():
     def set_proxies(self, proxies):
         self.proxies = proxies
 
-    def do_request(self, url, param = None, method="GET"):
+    def do_request(self, url, param = None, method="GET", type="text"):
         if self.proxies is None:
             if method == "GET":
                 res = self.session.get(url, params=param)
@@ -41,7 +41,10 @@ class RestAgent():
         if res.status_code != 200:
             return None
         else:
-            return res.text
+            if type == 'text':
+                return res.text
+            else:
+                return res.content
 
     def get_aspx_param(self, url):
         html = self.do_request(url)
