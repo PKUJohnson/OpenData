@@ -4,7 +4,6 @@ from opendatatools.common import RestAgent
 import json
 import pandas as pd
 import io
-import xlrd
 
 class SHExAgent(RestAgent):
     def __init__(self):
@@ -47,6 +46,19 @@ class SHExAgent(RestAgent):
         else:
             return None
 
+    def get_rzrq_info(self, date):
+        url = 'http://www.sse.com.cn/market/dealingdata/overview/margin/a/rzrqjygk%s.xls' % (date)
+        response = self.do_request(url, None, method='GET', type='binary')
+        if response is not None:
+            excel = pd.ExcelFile(io.BytesIO(response))
+            df_total = excel.parse('汇总信息').dropna()
+            df_detail = excel.parse('明细信息').dropna()
+            df_total['date'] = date
+            df_detail['date'] = date
+            return df_total, df_detail
+        else:
+            return None, None
+
 class SZExAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
@@ -71,5 +83,84 @@ class SZExAgent(RestAgent):
         }
 
         response = self.do_request(url, data, method='GET', type='binary')
-        df = pd.read_excel(io.BytesIO(response))
-        return df
+        if response is not None:
+            df = pd.read_excel(io.BytesIO(response))
+            return df
+        else:
+            return None
+
+    def get_rzrq_info(self, date):
+        df_total  = self._get_rzrq_total(date)
+        df_detail = self._get_rzrq_detail(date)
+        df_total['date'] = date
+        df_detail['date'] = date
+        return df_total, df_detail
+
+    def _get_rzrq_total(self, date):
+        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        data = {
+            'SHOWTYPE': 'xls',
+            'CATALOGID': '1837_xxpl',
+            'TABKEY' : 'tab1',
+        }
+
+        response = self.do_request(url, data, method='GET', type='binary')
+        if response is not None:
+            df = pd.read_excel(io.BytesIO(response))
+            return df
+        else:
+            return None
+
+    def _get_rzrq_detail(self, date):
+        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        data = {
+            'SHOWTYPE': 'xls',
+            'CATALOGID': '1837_xxpl',
+            'TABKEY': 'tab2',
+        }
+
+        response = self.do_request(url, data, method='GET', type='binary')
+        if response is not None:
+            df = pd.read_excel(io.BytesIO(response))
+            return df
+        else:
+            return None
+
+
+class CSIAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+
+    def get_index_list(self):
+        url = 'http://www.csindex.com.cn/zh-CN/indices/index'
+
+        page = 1
+        result_data = []
+        while True:
+            data = {
+                "data_type" : "json",
+                "page"       : page,
+            }
+            response = self.do_request(url, data, method='GET')
+            rsp = json.loads(response)
+
+            page = page + 1
+            print("fetching data at page %d" % (page) )
+            if "list" in rsp:
+                result_data.extend(rsp['list'])
+                if len(rsp['list']) == 0:
+                    break
+            else:
+                return None
+
+        return pd.DataFrame(result_data)
+
+    def get_index_component(self, index):
+        url = 'http://www.csindex.com.cn/uploads/file/autofile/cons/%scons.xls' % (index)
+
+        response = self.do_request(url, None, method='GET', type='binary')
+        if response is not None:
+            df = pd.read_excel(io.BytesIO(response))
+            return df
+        else:
+            return None

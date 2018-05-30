@@ -5,9 +5,9 @@ import calendar
 
 lastday_map = {}
 
-def get_current_day():
+def get_current_day(format = "%Y-%m-%d"):
     curr_date = datetime.datetime.now()
-    return datetime.datetime.strftime(curr_date, "%Y-%m-%d")
+    return datetime.datetime.strftime(curr_date, format)
 
 def date_convert(date, format, target_format):
     return datetime.datetime.strftime(datetime.datetime.strptime(date, format), target_format)

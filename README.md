@@ -6,3 +6,4 @@
 + 2018-05-29 : 0.0.9 add HKEx Interface（港交所陆港通数据）
 + 2018-05-30 : 0.1.0 add Coin Interface（数字货币接口）
 + 2018-05-30 : 0.1.1 add Stock Interface（股票接口，目前支持获取沪深指数列表）
++ 2018-05-30 : 0.1.2 update Stock Interface（增加支持中证指数，指数成份股，融资融券数据）
