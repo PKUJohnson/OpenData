@@ -50,7 +50,7 @@ class HKExAgent(RestAgent):
             "Content-Type" : "application/x-www-form-urlencoded",
         })
 
-        rsp = self.do_request(url, data, self.proxies, "POST")
+        rsp = self.do_request(url, data, "POST")
 
         # 2. 开始解析返回数据，并从html中提取需要的内容
         data = list()
