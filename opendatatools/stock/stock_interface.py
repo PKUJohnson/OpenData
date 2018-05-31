@@ -45,3 +45,12 @@ def get_rzrq_info(market='SH', date = None):
         return szex_agent.get_rzrq_info(date)
 
     return None, None
+
+def get_dividend(symbol):
+    temp = symbol.split(".")
+
+    if len(temp) == 2:
+        market = temp[1]
+        code = temp[0]
+        if market == 'SH':
+            return shex_agent.get_dividend(code)

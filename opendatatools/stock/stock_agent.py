@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 from opendatatools.common import RestAgent
+from opendatatools.common import date_convert
 import json
 import pandas as pd
 import io
@@ -42,6 +43,22 @@ class SHExAgent(RestAgent):
 
         if 'pageHelp' in rsp:
             data = rsp['pageHelp']['data']
+            return pd.DataFrame(data)
+        else:
+            return None
+
+    def get_dividend(self, code):
+        url = 'http://query.sse.com.cn/commonQuery.do'
+        data = {
+            'sqlId' : 'COMMON_SSE_GP_SJTJ_FHSG_AGFH_L_NEW',
+            'security_code_a' : code,
+        }
+
+        response = self.do_request(url, data)
+        rsp = json.loads(response)
+
+        if 'result' in rsp:
+            data = rsp['result']
             return pd.DataFrame(data)
         else:
             return None
@@ -90,10 +107,15 @@ class SZExAgent(RestAgent):
             return None
 
     def get_rzrq_info(self, date):
+
+        date = date_convert(date, '%Y%m%d', '%Y-%m-%d')
+
         df_total  = self._get_rzrq_total(date)
         df_detail = self._get_rzrq_detail(date)
-        df_total['date'] = date
-        df_detail['date'] = date
+        if df_total is not None:
+            df_total['date'] = date
+        if df_detail is not None:
+            df_detail['date'] = date
         return df_total, df_detail
 
     def _get_rzrq_total(self, date):
@@ -102,10 +124,11 @@ class SZExAgent(RestAgent):
             'SHOWTYPE': 'xls',
             'CATALOGID': '1837_xxpl',
             'TABKEY' : 'tab1',
+            "txtDate": date,
         }
 
         response = self.do_request(url, data, method='GET', type='binary')
-        if response is not None:
+        if response is not None and len(response) > 0:
             df = pd.read_excel(io.BytesIO(response))
             return df
         else:
@@ -117,10 +140,11 @@ class SZExAgent(RestAgent):
             'SHOWTYPE': 'xls',
             'CATALOGID': '1837_xxpl',
             'TABKEY': 'tab2',
+            "txtDate" : date,
         }
 
         response = self.do_request(url, data, method='GET', type='binary')
-        if response is not None:
+        if response is not None and len(response) > 0:
             df = pd.read_excel(io.BytesIO(response))
             return df
         else:

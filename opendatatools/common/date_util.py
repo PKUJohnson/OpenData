@@ -51,12 +51,16 @@ def get_month_lastday(datestr, format = "%Y-%m-%d"):
     lastday_map[datestr] = result
     return result
 
-def get_target_date(span, format="%Y%m%d"):
+def get_target_date(span, format="%Y-%m-%d"):
     today = datetime.date.today() 
     span_days = datetime.timedelta(days=span) 
     target = today + span_days  
     return datetime.datetime.strftime(target, format)
-    
+
+def split_date(datestr, format = "%Y-%m-%d"):
+    date = datetime.datetime.strptime(datestr, format)
+    return date.year, date.month, date.day
+
 if __name__ == '__main__':
     print(get_target_date(0))
     print(get_target_date(10))

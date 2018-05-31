@@ -7,3 +7,7 @@
 + 2018-05-30 : 0.1.0 add Coin Interface（数字货币接口）
 + 2018-05-30 : 0.1.1 add Stock Interface（股票接口，目前支持获取沪深指数列表）
 + 2018-05-30 : 0.1.2 update Stock Interface（增加支持中证指数，指数成份股，融资融券数据）
++ 2018-05-31 : 0.1.3 add fx Interface（支持查询人民币汇率信息/Shibor隔夜利率信息）
++ 2018-05-31 : 0.1.3 add futures Interface（支持查询国内期货交易所的持仓交易排名信息）
+
+
