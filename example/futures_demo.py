@@ -3,5 +3,9 @@
 from opendatatools import futures
 
 if __name__ == '__main__':
-    df, msg = futures.get_trade_rank(market = 'CFE')
-    print(df)
+
+    markets = ['SHF', 'CZC', 'DCE', 'CFE']
+    for market in markets:
+        df, msg = futures.get_trade_rank(market, date='2018-05-30')
+        print(df)
+

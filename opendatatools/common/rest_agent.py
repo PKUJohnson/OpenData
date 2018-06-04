@@ -26,17 +26,17 @@ class RestAgent():
     def set_proxies(self, proxies):
         self.proxies = proxies
 
-    def do_request(self, url, param = None, method="GET", type="text"):
+    def do_request(self, url, param = None, method="GET", type="text", **kwargs):
         if self.proxies is None:
             if method == "GET":
-                res = self.session.get(url, params=param)
+                res = self.session.get(url, params=param, **kwargs)
             else:
-                res = self.session.post(url, data=param)
+                res = self.session.post(url, data=param, **kwargs)
         else:
             if method == "GET":
-                res = self.session.get(url, params=param, proxies=self.proxies)
+                res = self.session.get(url, params=param, proxies=self.proxies, **kwargs)
             else:
-                res = self.session.post(url, data=param, proxies=self.proxies)
+                res = self.session.post(url, data=param, proxies=self.proxies, **kwargs)
 
         if res.status_code != 200:
             return None

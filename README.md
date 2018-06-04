@@ -9,5 +9,7 @@
 + 2018-05-30 : 0.1.2 update Stock Interface（增加支持中证指数，指数成份股，融资融券数据）
 + 2018-05-31 : 0.1.3 add fx Interface（支持查询人民币汇率信息/Shibor隔夜利率信息）
 + 2018-05-31 : 0.1.3 add futures Interface（支持查询国内期货交易所的持仓交易排名信息）
++ 2018-06-04 : 0.2.0 add economy Interface（支持中国宏观经济的各类指标）
++ 2018-06-04 : 0.2.0 add real estate Interface（支持查询lianjia.com网站上的二手房销售信息（支持北京上海））
 
 
