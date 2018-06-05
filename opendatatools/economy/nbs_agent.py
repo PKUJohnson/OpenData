@@ -111,6 +111,13 @@ nbs_region_map = {
     '新疆维吾尔自治区': '650000',
 }
 
+nbs_indicator_map_df = {
+    # 地方GDP
+    'A010101':'地区生产总值_累计值(亿元)',
+    'A010103':'地区生产总值指数(上年=100)_累计值(%)',
+
+}
+
 nbs_indicator_map = {
 
     # 年度GDP
@@ -127,6 +134,15 @@ nbs_indicator_map = {
     'A030103':'女性人口(万人)',
     'A030104':'城镇人口(万人)',
     'A030105':'乡村人口(万人)',
+
+    # 人口结构
+    'A030301':'年末总人口(万人)',
+    'A030302':'0-14岁人口(万人)',
+    'A030303':'15-64岁人口(万人)',
+    'A030304':'65岁及以上人口(万人)',
+    'A030305':'总抚养比(%)',
+    'A030306':'少儿抚养比(%)',
+    'A030307':'老年抚养比(%)',
 
     # 70 个大中城市商品房价格情况
     'A010801':'新建住宅销售价格指数(上月=100)',
@@ -471,11 +487,11 @@ class NBSAgent(RestAgent):
             "dbcode": dbcode,
             "rowcode": "zb",
             "colcode": "sj",
-            "wds" : '[{"wdcode": "region", "valuecode": %s}]' % (region_code),
-            "dfwds": '[{"wdcode":"sj","valuecode":"LAST36"}]',
+            "wds" : '[{"wdcode": "region", "valuecode": "%s"}]' % (region_code),
+            "dfwds": '[{"wdcode":"zb","valuecode":"%s"}, {"wdcode":"sj","valuecode":"LAST36"}]' % (category),
         }
 
-        url = 'http://data.stats.gov.cn/easyquery.htm?cn=%s&zb=%s&region=%s' % (cn, category,region_code)
+        url = 'http://data.stats.gov.cn/easyquery.htm?cn=%s&zb=%s&reg=%s' % (cn, category,region_code)
         cookies = self.prepare_cookies(url)
 
         response = self.do_request(
@@ -494,7 +510,9 @@ class NBSAgent(RestAgent):
             date  = record['wds'][2]['valuecode']
             indicator = record['wds'][0]['valuecode']
 
-            if indicator in nbs_indicator_map:
+            if indicator in nbs_indicator_map_df:
+                indicator_name = nbs_indicator_map_df[indicator]
+            elif indicator in nbs_indicator_map:
                 indicator_name = nbs_indicator_map[indicator]
             else:
                 indicator_name = ""
@@ -515,7 +533,7 @@ class NBSAgent(RestAgent):
         if city not in nbs_city_map:
             return None, '不合法的城市名称，请通过get_city_map获取正确的城市名称'
 
-        region_code = nbs_region_map[city]
+        region_code = nbs_city_map[city]
         url = 'http://data.stats.gov.cn/easyquery.htm'
 
         param = {
@@ -527,7 +545,7 @@ class NBSAgent(RestAgent):
             "dfwds": '[{"wdcode":"sj","valuecode":"LAST36"}]',
         }
 
-        url = 'http://data.stats.gov.cn/easyquery.htm?cn=%s&zb=%s&region=%s' % (cn, category,region_code)
+        url = 'http://data.stats.gov.cn/easyquery.htm?cn=%s&zb=%s&reg=%s' % (cn, category,region_code)
         cookies = self.prepare_cookies(url)
 
         response = self.do_request(
@@ -571,8 +589,14 @@ class NBSAgent(RestAgent):
     def get_gdp_y(self):
         return self._get_qg_indicator('C01', 'A0201', dbcode='hgnd')
 
+    def get_region_gdp_y(self, region):
+        return self._get_fs_indicator('E0103', 'A0201', dbcode='fsnd')
+
     def get_population_size_y(self):
         return self._get_qg_indicator('C01', 'A0301', dbcode='hgnd')
+
+    def get_population_structure_y(self):
+        return self._get_qg_indicator('C01', 'A0303', dbcode='hgnd')
 
     # 70 个大中城市住宅销售价格指数
     def get_house_price_index(self, city):

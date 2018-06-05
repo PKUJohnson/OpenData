@@ -1,8 +1,37 @@
 # encoding: utf-8
 
+import datetime
 from .nbs_agent import NBSAgent
 
 nbs_agent = NBSAgent()
+
+def convert_date(date, date_format):
+    if date_format == '%YQ':
+        date_format = '%Y%m'
+        date = date.replace('A', '03').replace('B', '06').replace('C', '09').replace('D', '12')
+
+    return datetime.datetime.strptime(date, date_format)
+
+def disp_result(df, date_format = '%Y%m'):
+    import matplotlib.pyplot as plt
+    import datetime
+
+    from matplotlib.pylab import mpl
+    # 指定默认字体
+    mpl.rcParams['font.sans-serif'] = ['FangSong']
+    # 解决保存图像是负号'-'显示为方块的问题
+    mpl.rcParams['axes.unicode_minus'] = False
+
+    fig = plt.figure(figsize=(16,10))
+    for name, sub_df in df.groupby('indicator_name'):
+        sub_df['date'] = sub_df['date'].apply(lambda x : convert_date(x, date_format))
+        sub_df.set_index('date', inplace = True)
+        sub_df.sort_index(ascending=True, inplace=True)
+        plt.plot(sub_df.index, sub_df['value'], label=name)
+        plt.legend()
+
+    plt.grid(True)
+    plt.show()
 
 # 指标名称映射表
 def get_indicator_map():
@@ -20,8 +49,14 @@ def get_city_map():
 def get_gdp_y():
     return nbs_agent.get_gdp_y()
 
+def get_region_gdp_y():
+    return nbs_agent.get_region_gdp_y()
+
 def get_population_size_y():
     return nbs_agent.get_population_size_y()
+
+def get_population_structure_y():
+    return nbs_agent.get_population_structure_y()
 
 def get_house_price_index(region):
     return nbs_agent.get_house_price_index(region)
