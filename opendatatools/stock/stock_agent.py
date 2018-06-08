@@ -2,6 +2,7 @@
 
 from opendatatools.common import RestAgent
 from opendatatools.common import date_convert
+import datetime
 import json
 import pandas as pd
 import io
@@ -188,3 +189,184 @@ class CSIAgent(RestAgent):
             return df
         else:
             return None
+
+class XueqiuAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+
+    # 600000.SH -> SH600000
+    def convert_to_xq_symbol(self, symbol):
+        temp = symbol.split(".")
+        return temp[1] + temp[0]
+
+    def convert_to_xq_symbols(self, symbols):
+        result = ''
+        for symbol in symbols.split(','):
+            result = result + self.convert_to_xq_symbol(symbol) + ','
+        return result
+
+    # SH600000 -> 600000.SH
+    def convert_from_xq_symbol(self, symbol):
+        market = symbol[0:2]
+        code   = symbol[2:]
+        return code + '.' + market
+
+    def prepare_cookies(self, url):
+        response = self.do_request(url, None)
+        if response is not None:
+            cookies = self.get_cookies()
+            return cookies
+        else:
+            return None
+
+    def get_quote(self, symbols):
+        url = 'https://stock.xueqiu.com/v5/stock/realtime/quotec.json'
+        data = {
+            'symbol' : self.convert_to_xq_symbols(symbols)
+        }
+
+        # {"data":[{"symbol":"SH000001","current":3073.8321,"percent":-1.15,"chg":-35.67,"timestamp":1528427643770,"volume":6670380300,"amount":8.03515860132E10,"market_capital":1.393367880255658E13,"float_market_capital":1.254120000811718E13,"turnover_rate":0.64,"amplitude":0.91,"high":3100.6848,"low":3072.5418,"avg_price":3073.832,"trade_volume":5190400,"side":0,"is_trade":true,"level":1,"trade_session":null,"trade_type":null}],"error_code":0,"error_description":null}
+        response = self.do_request(url, data, method='GET')
+
+        if response is not None:
+            jsonobj = json.loads(response)
+            if jsonobj['error_code'] == 0:
+                result = []
+                for rsp in jsonobj['data']:
+                    result.append( {
+                        'time'   : datetime.datetime.fromtimestamp(rsp['timestamp']/1000),
+                        'symbol' : self.convert_from_xq_symbol(rsp['symbol']),
+                        'high'   : rsp['high'],
+                        'low'    : rsp['low'],
+                        'last'   : rsp['current'],
+                        'change' : rsp['chg'],
+                        'percent': rsp['percent'],
+                        'volume' : rsp['volume'],
+                        'amount' : rsp['amount'],
+                        'turnover_rate'         : rsp['turnover_rate'],
+                        'market_capital'        : rsp['market_capital'],
+                        'float_market_capital' : rsp['float_market_capital'],
+                        'is_trading'            : rsp['is_trade'],
+                    } )
+
+                return pd.DataFrame(result), ''
+            else:
+                return None, jsonobj['error_description']
+        else:
+            return None, '请求数据失败'
+
+    def get_kline(self, symbol, timestamp, period, count):
+        url = 'https://stock.xueqiu.com/v5/stock/chart/kline.json'
+        data = {
+            'symbol' : self.convert_to_xq_symbol(symbol),
+            'begin'  : timestamp,
+            'period' : period,
+            'type'   : 'before',
+            'count'  : count,
+            'indicator' : 'kline',
+        }
+
+        cookies = self.prepare_cookies('https://xueqiu.com/hq')
+
+        response = self.do_request(url, data, cookies=cookies, method='GET')
+
+        if response is not None:
+            jsonobj = json.loads(response)
+            if jsonobj['error_code'] == 0:
+                result = []
+                for rsp in jsonobj['data']['item']:
+                    result.append( {
+                        'symbol' : symbol,
+                        'time'   : datetime.datetime.fromtimestamp(rsp[0]/1000),
+                        'volume' : rsp[1],
+                        'open'   : rsp[2],
+                        'high'   : rsp[3],
+                        'low'    : rsp[4],
+                        'last'   : rsp[5],
+                        'change' : rsp[6],
+                        'percent': rsp[7],
+                        'turnover_rate'         : rsp[8],
+                    } )
+
+                return pd.DataFrame(result), ''
+            else:
+                return None, jsonobj['error_description']
+        else:
+            return None, '请求数据失败'
+
+
+    def get_kline_multisymbol(self, symbols, timestamp, period, count):
+
+        cookies = self.prepare_cookies('https://xueqiu.com/hq')
+        url = 'https://stock.xueqiu.com/v5/stock/chart/kline.json'
+
+        result = []
+        for symbol in symbols:
+
+            data = {
+                'symbol' : self.convert_to_xq_symbol(symbol),
+                'begin'  : timestamp,
+                'period' : period,
+                'type'   : 'before',
+                'count'  : count,
+                'indicator' : 'kline',
+            }
+
+            response = self.do_request(url, data, cookies=cookies, method='GET')
+
+            if response is not None:
+                jsonobj = json.loads(response)
+                if jsonobj['error_code'] == 0:
+                    for rsp in jsonobj['data']['item']:
+                        result.append( {
+                            'symbol' : symbol,
+                            'time'   : datetime.datetime.fromtimestamp(rsp[0]/1000),
+                            'volume' : rsp[1],
+                            'open'   : rsp[2],
+                            'high'   : rsp[3],
+                            'low'    : rsp[4],
+                            'last'   : rsp[5],
+                            'change' : rsp[6],
+                            'percent': rsp[7],
+                            'turnover_rate': rsp[8],
+                        } )
+
+        return pd.DataFrame(result), ''
+
+    def get_kline_multitimestamp(self, symbol, timestamps, period, count):
+
+        cookies = self.prepare_cookies('https://xueqiu.com/hq')
+        url = 'https://stock.xueqiu.com/v5/stock/chart/kline.json'
+
+        result = []
+        for timestamp in timestamps:
+            data = {
+                'symbol' : self.convert_to_xq_symbol(symbol),
+                'begin'  : timestamp,
+                'period' : period,
+                'type'   : 'before',
+                'count'  : count,
+                'indicator' : 'kline',
+            }
+
+            response = self.do_request(url, data, cookies=cookies, method='GET')
+
+            if response is not None:
+                jsonobj = json.loads(response)
+                if jsonobj['error_code'] == 0:
+                    for rsp in jsonobj['data']['item']:
+                        result.append( {
+                            'symbol' : symbol,
+                            'time'   : datetime.datetime.fromtimestamp(rsp[0]/1000),
+                            'volume' : rsp[1],
+                            'open'   : rsp[2],
+                            'high'   : rsp[3],
+                            'low'    : rsp[4],
+                            'last'   : rsp[5],
+                            'change' : rsp[6],
+                            'percent': rsp[7],
+                            'turnover_rate': rsp[8],
+                        } )
+
+        return pd.DataFrame(result), ''
+

@@ -26,5 +26,18 @@ if __name__ == '__main__':
     #print(df_detail)
 
     # 获取分红信息
-    df = stock.get_dividend('600000.SH')
+    #df = stock.get_dividend('600000.SH')
+    #print(df)
+
+    # 获取实时行情
+    stock.set_proxies({"https" : "https://127.0.0.1:1080"})
+
+    #df, msg = stock.quote('600000.SH,000002.SZ')
+    #df, msg = stock.get_kline_multisymbol('600000.SH,000002.SZ', '2018-06-07', '1m')
+    #print(df)
+    #print(msg)
+
+    #df, msg = stock.get_kline_multidate('600000.SH', start_date='2018-06-06', end_date='2018-06-07', period = '1m')
+    df, msg = stock.get_daily('600000.SH', start_date='2017-06-06', end_date='2018-06-07')
     print(df)
+    print(msg)
