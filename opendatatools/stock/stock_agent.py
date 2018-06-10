@@ -2,6 +2,7 @@
 
 from opendatatools.common import RestAgent
 from opendatatools.common import date_convert
+from bs4 import BeautifulSoup
 import datetime
 import json
 import pandas as pd
@@ -370,3 +371,111 @@ class XueqiuAgent(RestAgent):
 
         return pd.DataFrame(result), ''
 
+class SinaAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+
+    @staticmethod
+    def clear_text(text):
+        return text.replace('\n', '').strip()
+
+    def get_adj_factor(self, symbol):
+        now = datetime.datetime.now()
+        year = now.year
+        month = now.month
+        if month < 4 :
+            quarter = 1
+        elif month < 7:
+            quarter = 2
+        elif month < 10:
+            quarter = 3
+        else:
+            quarter = 4
+
+        temp = symbol.split(".")
+        url = 'http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_FuQuanMarketHistory/stockid/%s.phtml' % temp[0]
+
+        curr_year = year
+        curr_quarter = quarter
+        result_list = []
+        no_data_cnt = 0
+        while True:
+            print('getting data for year = %d, quarter = %d' % (curr_year, curr_quarter))
+            param = {
+                'year' : curr_year,
+                'jidu' : curr_quarter,
+            }
+            response = self.do_request(url, param, method='GET', encoding='gb18030')
+            soup = BeautifulSoup(response, "html5lib")
+            divs = soup.find_all('div')
+
+            data = []
+            for div in divs:
+                if div.has_attr('class') and 'tagmain' in div['class']:
+                    tables = div.find_all('table')
+
+                    for table in tables:
+                        if table.has_attr('id') and table['id'] == 'FundHoldSharesTable':
+                            rows = table.findAll('tr')
+                            for row in rows:
+                                cols = row.findAll('td')
+                                if len(cols) == 8:
+                                    date = SinaAgent.clear_text(cols[0].text)
+                                    adjust_factor = SinaAgent.clear_text(cols[7].text)
+
+                                    if date == '日期':
+                                        continue
+
+                                    data.append({
+                                        "date": date,
+                                        "adjust_factor": adjust_factor,
+                                    })
+
+            result_list.extend(data)
+            if len(data) == 0:
+                no_data_cnt = no_data_cnt + 1
+                if no_data_cnt >= 3:
+                    break
+
+            # prepare for next round
+            if curr_quarter == 1:
+                curr_year = curr_year - 1
+                curr_quarter = 4
+            else:
+                curr_quarter = curr_quarter - 1
+
+        return pd.DataFrame(result_list), ""
+
+    # 600000.SH -> SH600000
+    def convert_to_sina_symbol(self, symbol):
+        temp = symbol.split(".")
+        return temp[1].lower() + temp[0]
+
+    def get_trade_detail(self, symbol, trade_date):
+        url = 'http://market.finance.sina.com.cn/downxls.php?date=%s&symbol=%s' % (trade_date, self.convert_to_sina_symbol(symbol))
+
+        response = self.do_request(url, None, method='GET', type='text', encoding='gb18030')
+        if response is not None:
+            rsp = io.StringIO(response)
+            line = rsp.readline()  # skip first line
+            line = rsp.readline()
+            result = []
+            while line is not None and len(line) > 10:
+                items = line.split('\t')
+                if len(items) == 6:
+                    result.append({
+                        'time'    : SinaAgent.clear_text(items[0]),
+                        'price'   : SinaAgent.clear_text(items[1]),
+                        'change'  : SinaAgent.clear_text(items[2]),
+                        'volume'   : SinaAgent.clear_text(items[3]),
+                        'turnover': SinaAgent.clear_text(items[4]),
+                        'bs'       : SinaAgent.clear_text(items[5]),
+                    })
+                line = rsp.readline()
+
+            df = pd.DataFrame(result)
+            df['date'] = trade_date
+            df['symbol'] = symbol
+            return df, ''
+
+        return None, '获取数据失败'

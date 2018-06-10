@@ -26,7 +26,7 @@ class RestAgent():
     def set_proxies(self, proxies):
         self.proxies = proxies
 
-    def do_request(self, url, param = None, method="GET", type="text", **kwargs):
+    def do_request(self, url, param = None, method="GET", type="text", encoding = None, **kwargs):
         if self.proxies is None:
             if method == "GET":
                 res = self.session.get(url, params=param, **kwargs)
@@ -41,6 +41,10 @@ class RestAgent():
         if res.status_code != 200:
             return None
         else:
+
+            if encoding is not None:
+                res.encoding = encoding
+
             if type == 'text':
                 return res.text
             else:

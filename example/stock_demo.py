@@ -38,6 +38,8 @@ if __name__ == '__main__':
     #print(msg)
 
     #df, msg = stock.get_kline_multidate('600000.SH', start_date='2018-06-06', end_date='2018-06-07', period = '1m')
-    df, msg = stock.get_daily('600000.SH', start_date='2017-06-06', end_date='2018-06-07')
+    #df, msg = stock.get_daily('600000.SH', start_date='2017-06-06', end_date='2018-06-07')
+    #df, msg = stock.get_adj_factor('600000.SH')
+    df, msg = stock.get_trade_detail('600000.SH', trade_date='2018-06-07')
     print(df)
     print(msg)

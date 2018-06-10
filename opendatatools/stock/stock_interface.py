@@ -2,13 +2,14 @@
 
 import datetime
 
-from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent
+from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent, SinaAgent
 from opendatatools.common import get_current_day
 
 shex_agent = SHExAgent()
 szex_agent = SZExAgent()
 csi_agent  = CSIAgent()
 xq_agent   = XueqiuAgent()
+sina_agent = SinaAgent()
 
 xq_count_map = {
     '1m': 240,
@@ -128,4 +129,10 @@ def get_daily(symbol, start_date, end_date):
         return df, ''
     else:
         return None, '没有获取到数据'
+
+def get_adj_factor(symbol):
+    return sina_agent.get_adj_factor(symbol)
+
+def get_trade_detail(symbol, trade_date):
+    return sina_agent.get_trade_detail(symbol, trade_date)
 
