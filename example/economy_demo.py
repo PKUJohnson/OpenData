@@ -184,7 +184,7 @@ if __name__ == '__main__':
     print(df)
     '''
 
-    df, msg = economy.get_house_price_index('九江')
+    df, msg = economy.get_house_price_index('天津')
     df_1 = df[(df['value'] != 0) & (
                                         (df['indicator'] == 'A010801') | (df['indicator'] == 'A010804') | (df['indicator'] == 'A010807') |
                                         (df['indicator'] == 'A01080A') | (df['indicator'] == 'A01080D') | (df['indicator'] == 'A01080G') |

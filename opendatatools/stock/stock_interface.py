@@ -75,7 +75,7 @@ def get_dividend(symbol):
             return shex_agent.get_dividend(code)
 
 def get_quote(symbols):
-    return xq_agent.quote(symbols)
+    return xq_agent.get_quote(symbols)
 
 # period 1m, 5m, 15m, 30m, 60m
 def get_kline(symbol, trade_date, period):

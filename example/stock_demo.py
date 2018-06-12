@@ -31,15 +31,18 @@ if __name__ == '__main__':
 
     # 获取实时行情
     stock.set_proxies({"https" : "https://127.0.0.1:1080"})
+    df, msg = stock.get_quote('600000.SH,000002.SZ')
 
-    #df, msg = stock.quote('600000.SH,000002.SZ')
-    #df, msg = stock.get_kline_multisymbol('600000.SH,000002.SZ', '2018-06-07', '1m')
-    #print(df)
-    #print(msg)
+    # 获取分钟线
+    df, msg = stock.get_kline('000002.SZ', '2018-06-11', '1m')
+
+    #df, msg = stock.get_kline_multisymbol('600000.SH,000002.SZ', '2018-06-11', '1m')
+    print(df)
+    print(msg)
 
     #df, msg = stock.get_kline_multidate('600000.SH', start_date='2018-06-06', end_date='2018-06-07', period = '1m')
     #df, msg = stock.get_daily('600000.SH', start_date='2017-06-06', end_date='2018-06-07')
     #df, msg = stock.get_adj_factor('600000.SH')
-    df, msg = stock.get_trade_detail('600000.SH', trade_date='2018-06-07')
-    print(df)
-    print(msg)
+    #df, msg = stock.get_trade_detail('600000.SH', trade_date='2018-06-07')
+    #print(df)
+    #print(msg)
