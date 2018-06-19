@@ -12,13 +12,30 @@ xq_agent   = XueqiuAgent()
 sina_agent = SinaAgent()
 
 xq_count_map = {
-    '1m': 240,
-    '5m': 48,
-    '15m': 16,
-    '30m': 8,
-    '60m': 4,
-    '1d' : 1,
+    '1m': -240,
+    '5m': -48,
+    '15m': -16,
+    '30m': -8,
+    '60m': -4,
+    '1d' : -1,
 }
+
+bar_span_map = {
+    '1m'  : 1,
+    '5m'  : 5,
+    '15m' : 15,
+    '30m' : 30,
+    '60m' : 60,
+}
+
+
+def make_index(period, trade_date):
+    bar_index = list()
+    span = bar_span_map[period]
+    dt = datetime.datetime.strptime(trade_date,'%Y-%m-%d')
+    bar_index.extend(pd.DatetimeIndex(start="%s 09:30:00" % trade_date, end="%s 11:30:00" % trade_date, freq='%sT' % span)[1:])
+    bar_index.extend(pd.DatetimeIndex(start="%s 13:00:00" % trade_date, end="%s 15:00:00" % trade_date, freq='%sT' % span)[1:])
+    return bar_index
 
 def set_proxies(proxies):
     shex_agent.set_proxies(proxies)
@@ -77,11 +94,41 @@ def get_dividend(symbol):
 def get_quote(symbols):
     return xq_agent.get_quote(symbols)
 
+def fill_df(df, period, trade_date, symbol):
+    df.index = df['time']
+    index = make_index(period, trade_date)
+    df_new = pd.DataFrame(index=index, columns=['last'])
+    df_new['last'] = df['last']
+    df_new.fillna(method='ffill', inplace=True)
+    df_new['high'] = df['high']
+    df_new['low'] = df['low']
+    df_new['open'] = df['open']
+    df_new.fillna(method='ffill', axis=1, inplace=True)
+    df_new['change'] = df['change']
+    df_new['percent'] = df['percent']
+    df_new['symbol'] = symbol
+    df_new['turnover_rate'] = df['turnover_rate']
+    df_new['volume'] = df['volume']
+    df_new['time'] = df_new.index
+    df_new.fillna(0, inplace=True)
+    return df_new
+
 # period 1m, 5m, 15m, 30m, 60m
 def get_kline(symbol, trade_date, period):
-    timestamp = datetime.datetime.strptime(trade_date, '%Y-%m-%d').timestamp()
+    next_date = datetime.datetime.strptime(trade_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+    timestamp = next_date.timestamp()
+
     timestamp = int ( timestamp * 1000)
-    return xq_agent.get_kline(symbol, timestamp, period, xq_count_map[period])
+    df, msg = xq_agent.get_kline(symbol, timestamp, period, xq_count_map[period])
+    if df is None:
+        return df, msg
+
+    df = df[df.time < next_date]
+    if len(df) < xq_count_map[period]:
+        df_new = fill_df(df, period, trade_date, symbol)
+        return df_new, ''
+    else:
+        return df, ''
 
 def get_kline_multisymbol(symbols, trade_date, period):
 
@@ -89,7 +136,21 @@ def get_kline_multisymbol(symbols, trade_date, period):
 
     timestamp = datetime.datetime.strptime(trade_date, '%Y-%m-%d').timestamp()
     timestamp = int ( timestamp * 1000)
-    return xq_agent.get_kline_multisymbol(symbol_list, timestamp, period, xq_count_map[period])
+    df, msg = xq_agent.get_kline_multisymbol(symbol_list, timestamp, period, xq_count_map[period])
+    next_date = datetime.datetime.strptime(trade_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+    if df is None:
+        return df, msg
+
+    df = df[df.time < next_date]
+    gp = df.groupby('symbol')
+    df_list = list()
+    for symbol, df_item in gp:
+        if len(df_item) < xq_count_map[period]:
+            df_list.append(fill_df(df_item, period, trade_date, symbol))
+        else:
+            df_list(df_item)
+
+    return pd.concat(df_list), ''
 
 def get_timestamp_list(start_date, end_date):
     timestamp_list = []
