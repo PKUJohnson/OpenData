@@ -7,6 +7,12 @@ lianjia_agent = LianjiaAgent()
 def set_proxies(proxies):
     lianjia_agent.set_proxies(proxies)
 
+def get_city_list():
+    return lianjia_agent.get_city_list()
+
+def get_district_list():
+    return lianjia_agent.get_district_list()
+
 def get_esf_list_lianjia(city, max_page_no = 100):
     return lianjia_agent.get_esf_list(city, max_page_no)
 

@@ -2,6 +2,8 @@
 
 from opendatatools.common import RestAgent
 from bs4 import BeautifulSoup
+from progressbar import ProgressBar
+
 import pandas as pd
 import re
 
@@ -10,7 +12,7 @@ lianjia_city_map = {
     '上海市' : 'sh',
 }
 
-distinct_map = {
+district_map = {
     '东城':'dongcheng',
     '西城':'xicheng',
     '朝阳':'chaoyang',
@@ -53,6 +55,12 @@ class LianjiaAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
 
+    def get_city_list(self):
+        return lianjia_city_map.keys()
+
+    def get_district_list(self):
+        return district_map.keys()
+
     @staticmethod
     def clear_text(text):
         return text.replace('\n', '').strip()
@@ -71,16 +79,18 @@ class LianjiaAgent(RestAgent):
         if city in lianjia_city_map:
             city_code = lianjia_city_map[city]
 
-        if distinct in distinct_map:
-            distinct_code = distinct_map[distinct]
+        if distinct in district_map:
+            distinct_code = district_map[distinct]
 
         return self._get_esf_list_by_distinct(city_code, distinct_code, max_page_no)
 
     def _get_esf_list(self, city_code, max_page_no):
         page_no = 1
         result_list = []
+        process_bar = ProgressBar().start(max_value=max_page_no)
         while page_no <= max_page_no:
-            print('getting data from lianjia.com for page %d' % page_no)
+            process_bar.update(page_no)
+            #print('getting data from lianjia.com for page %d' % page_no)
             data_list = self._get_erf_list_url('https://%s.lianjia.com/ershoufang/pg%d/' % (city_code, page_no))
             page_no = page_no + 1
             if (len(data_list) == 0):
@@ -92,8 +102,10 @@ class LianjiaAgent(RestAgent):
     def _get_esf_list_by_distinct(self, city_code, distinct_code, max_page_no):
         page_no = 1
         result_list = []
+        process_bar = ProgressBar().start(max_value=max_page_no)
         while page_no <= max_page_no:
-            print('getting data from lianjia.com for page %d' % page_no)
+            process_bar.update(page_no)
+            #print('getting data from lianjia.com for page %d' % page_no)
             data_list = self._get_erf_list_url('https://%s.lianjia.com/ershoufang/%s/pg%d/' % (city_code, distinct_code, page_no))
             page_no = page_no + 1
             if (len(data_list) == 0):

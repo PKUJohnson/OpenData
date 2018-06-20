@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # 年度数据
     #df, msg = economy.get_gdp_y()
-    #economy.disp_result(df, data_format="%Y")
+    #economy.disp_result(df, date_format="%Y")
     #print(df)
 
     #df,msg = economy.get_population_size_y()
@@ -199,16 +199,7 @@ if __name__ == '__main__':
     economy.disp_result(df_2, '%Y%m')
     print(df)
 
-    #df, msg = economy.get_online_retail_sales()
-    #print(df)
-
-    #df, msg = economy.get_realestate_investment()
-    #print(df)
-
     #df, msg = economy.get_region_realestate_investment('上海')
-    #print(df)
-
-    #df, msg = economy.get_fixed_asset_investment()
     #print(df)
 
     #df, msg = economy.get_region_fixed_asset_investment('上海')
