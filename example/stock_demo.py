@@ -23,9 +23,15 @@ if __name__ == '__main__':
     #print(stock_list)
 
     # 获取融资融券市场信息
-    #df_total, df_detail = stock.get_rzrq_info(market = 'SZ', date = '20180614')
+    df_total, df_detail = stock.get_rzrq_info(market = 'SH', date = '2018-06-14')
+    print(df_total)
+    print(df_detail)
+
+    # 获取股权质押信息
+    #df_total, df_detail = stock.get_pledge_info(market = 'SH', date = '2018-06-20')
     #print(df_total)
     #print(df_detail)
+
 
     # 获取分红信息
     #df = stock.get_dividend('600000.SH')

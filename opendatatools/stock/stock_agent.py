@@ -66,7 +66,8 @@ class SHExAgent(RestAgent):
             return None
 
     def get_rzrq_info(self, date):
-        url = 'http://www.sse.com.cn/market/dealingdata/overview/margin/a/rzrqjygk%s.xls' % (date)
+        date2 = date_convert(date, '%Y-%m-%d', '%Y%m%d')
+        url = 'http://www.sse.com.cn/market/dealingdata/overview/margin/a/rzrqjygk%s.xls' % (date2)
         response = self.do_request(url, None, method='GET', type='binary')
         if response is not None:
             excel = pd.ExcelFile(io.BytesIO(response))
@@ -77,6 +78,21 @@ class SHExAgent(RestAgent):
             return df_total, df_detail
         else:
             return None, None
+
+    def get_pledge_info(self, date):
+        date2 = date_convert(date, '%Y-%m-%d', '%Y%m%d')
+        url = 'http://query.sse.com.cn/exportExcel/exportStockPledgeExcle.do?tradeDate=%s' % (date2)
+        response = self.do_request(url, None, method='GET', type='binary')
+        if response is not None:
+            excel = pd.ExcelFile(io.BytesIO(response))
+            df_total = excel.parse('交易金额汇总').dropna()
+            df_detail = excel.parse('交易数量明细').dropna()
+            df_total['date'] = date
+            df_detail['date'] = date
+            return df_total, df_detail
+        else:
+            return None, None
+
 
 class SZExAgent(RestAgent):
     def __init__(self):
@@ -109,9 +125,6 @@ class SZExAgent(RestAgent):
             return None
 
     def get_rzrq_info(self, date):
-
-        date = date_convert(date, '%Y%m%d', '%Y-%m-%d')
-
         df_total  = self._get_rzrq_total(date)
         df_detail = self._get_rzrq_detail(date)
         if df_total is not None:
@@ -152,6 +165,49 @@ class SZExAgent(RestAgent):
         else:
             return None
 
+    def get_pledge_info(self, date):
+        df_total  = self._get_pledge_info_total(date)
+        df_detail = self._get_pledge_info_detail(date)
+        if df_total is not None:
+            df_total['date'] = date
+        if df_detail is not None:
+            df_detail['date'] = date
+        return df_total, df_detail
+
+    def _get_pledge_info_total(self, date):
+        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        data = {
+            'SHOWTYPE': 'xls',
+            'CATALOGID': '1837_gpzyhgxx',
+            'TABKEY': 'tab1',
+            "txtDate" : date,
+            'ENCODE'  : 1,
+        }
+
+        response = self.do_request(url, data, method='GET', type='binary')
+        if response is not None and len(response) > 0:
+            df = pd.read_excel(io.BytesIO(response))
+            return df
+        else:
+            return None
+
+
+    def _get_pledge_info_detail(self, date):
+        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        data = {
+            'SHOWTYPE': 'xls',
+            'CATALOGID': '1837_gpzyhgxx',
+            'TABKEY': 'tab2',
+            "txtDate" : date,
+            'ENCODE'  : 1,
+        }
+
+        response = self.do_request(url, data, method='GET', type='binary')
+        if response is not None and len(response) > 0:
+            df = pd.read_excel(io.BytesIO(response))
+            return df
+        else:
+            return None
 
 class CSIAgent(RestAgent):
     def __init__(self):

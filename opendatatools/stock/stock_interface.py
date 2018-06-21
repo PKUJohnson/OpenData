@@ -72,13 +72,25 @@ def get_index_component(symbol):
 
 def get_rzrq_info(market='SH', date = None):
     if date is None:
-        date = get_current_day(format = '%Y%m%d')
+        date = get_current_day(format = '%Y-%m-%d')
 
     if market == 'SH':
         return shex_agent.get_rzrq_info(date)
 
     if market == 'SZ':
         return szex_agent.get_rzrq_info(date)
+
+    return None, None
+
+def get_pledge_info(market='SH', date = None):
+    if date is None:
+        date = get_current_day(format = '%Y-%m-%d')
+
+    if market == 'SH':
+        return shex_agent.get_pledge_info(date)
+
+    if market == 'SZ':
+        return szex_agent.get_pledge_info(date)
 
     return None, None
 
