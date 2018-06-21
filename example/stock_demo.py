@@ -23,12 +23,12 @@ if __name__ == '__main__':
     #print(stock_list)
 
     # 获取融资融券市场信息
-    df_total, df_detail = stock.get_rzrq_info(market = 'SH', date = '2018-06-14')
-    print(df_total)
-    print(df_detail)
+    #df_total, df_detail = stock.get_rzrq_info(market = 'SH', date = '2018-06-14')
+    #print(df_total)
+    #print(df_detail)
 
     # 获取股权质押信息
-    #df_total, df_detail = stock.get_pledge_info(market = 'SH', date = '2018-06-20')
+    #df_total, df_detail = stock.get_pledge_info(market = 'SZ', date = '2018-06-20')
     #print(df_total)
     #print(df_detail)
 
@@ -68,3 +68,9 @@ if __name__ == '__main__':
     #df, msg = stock.get_trade_detail('600000.SH', trade_date='2018-06-07')
     #print(df)
     #print(msg)
+
+    # 获取财务报表数据
+    df, msg = stock.get_report_data('000002.SZ', type='利润表')
+    #df, msg = stock.get_report_data('600000.SH', type='fzb')
+    print(df[df['报告年度'] == '2017-12-31'].T)
+    print(msg)

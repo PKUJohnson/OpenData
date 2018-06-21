@@ -2,7 +2,7 @@
 
 import datetime
 
-from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent, SinaAgent
+from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent, SinaAgent, CNInfoAgent
 from opendatatools.common import get_current_day
 
 shex_agent = SHExAgent()
@@ -10,6 +10,7 @@ szex_agent = SZExAgent()
 csi_agent  = CSIAgent()
 xq_agent   = XueqiuAgent()
 sina_agent = SinaAgent()
+cninfo_agent  = CNInfoAgent()
 
 xq_count_map = {
     '1m': -240,
@@ -209,3 +210,18 @@ def get_adj_factor(symbol):
 def get_trade_detail(symbol, trade_date):
     return sina_agent.get_trade_detail(symbol, trade_date)
 
+def get_report_data(symbol='600000.SH', type='资产负债表'):
+
+    dict_type = {
+        '利润表'    : 'lrb',
+        '资产负债表' : 'fzb',
+        '现金流量表' : 'llb',
+    }
+
+    if type not in dict_type:
+        return None, 'type输入错误，可以输入 %s' % dict_type.keys()
+
+    data = symbol.split(sep='.')
+    market = data[1].lower()
+    sym = data[0]
+    return cninfo_agent.get_report_data(market, sym, dict_type[type])

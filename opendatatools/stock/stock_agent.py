@@ -1,12 +1,14 @@
 # encoding: utf-8
 
 from opendatatools.common import RestAgent
-from opendatatools.common import date_convert
+from opendatatools.common import date_convert, remove_non_numerical
 from bs4 import BeautifulSoup
 import datetime
 import json
 import pandas as pd
 import io
+from opendatatools.futures.futures_agent import _concat_df
+import zipfile
 
 class SHExAgent(RestAgent):
     def __init__(self):
@@ -535,3 +537,56 @@ class SinaAgent(RestAgent):
             return df, ''
 
         return None, '获取数据失败'
+
+class CNInfoAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+
+    def _parse_report_file(self, file):
+        lines = file.readlines()
+        data_list = []
+        for i in range(len(lines)):
+            items = lines[i].decode('gbk').split()
+            if items[0][:2] == '机构':
+                head = items[0].split(sep=',')
+            else:
+                items    = lines[i].decode('gbk')[1:]
+                data     = items.split(sep=',')
+                data[0]  = data[0][1:-1]
+                data[-1] = remove_non_numerical(data[-1])
+                data_list.append(data)
+        df = pd.DataFrame(data_list)
+        df.columns = head
+        return df
+
+
+    def get_report_data(self, market, symbol, type):
+
+        url = 'http://www.cninfo.com.cn/cninfo-new/data/download'
+        data = {
+            'market'   : market,
+            'type'     : type,
+            'code'     : symbol,
+            'orgid'    : 'gs%s%s' % (market, symbol),
+            'minYear'  : '1990',
+            'maxYear'  : '2018',
+        }
+
+        response = self.do_request(url, param=data, method='POST', type='binary')
+        '''if response is None:
+            return None, '没有获取到数据'
+        else:
+        '''
+        try:
+            zip_ref = zipfile.ZipFile(io.BytesIO(response))
+            df_list = []
+            for finfo in zip_ref.infolist():
+                file = zip_ref.open(finfo, 'r')
+                df = self._parse_report_file(file)
+                df_list.append(df)
+            df_result = _concat_df(df_list)
+            df_result.reset_index(inplace=True, drop=True)
+
+            return df_result, ''
+        except:
+            return None, '获取数据失败'
