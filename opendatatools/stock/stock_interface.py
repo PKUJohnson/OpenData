@@ -5,11 +5,12 @@ import datetime
 from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent, SinaAgent, CNInfoAgent
 from opendatatools.common import get_current_day
 
-shex_agent = SHExAgent()
-szex_agent = SZExAgent()
-csi_agent  = CSIAgent()
-xq_agent   = XueqiuAgent()
-sina_agent = SinaAgent()
+shex_agent   = SHExAgent()
+szex_agent   = SZExAgent()
+csi_agent    = CSIAgent()
+xq_agent     = XueqiuAgent()
+sina_agent   = SinaAgent()
+cninfo_agent = CNInfoAgent()
 cninfo_agent  = CNInfoAgent()
 
 xq_count_map = {
