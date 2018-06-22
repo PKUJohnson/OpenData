@@ -91,7 +91,6 @@ class SHExAgent(RestAgent):
             df_detail = excel.parse('交易数量明细').dropna()
             df_total['date'] = date
             df_detail['date'] = date
-            df_detail['证券代码'] = df_detail['证券代码'].apply(lambda x : x.zfill(6))
             return df_total, df_detail
         else:
             return None, None
@@ -175,6 +174,7 @@ class SZExAgent(RestAgent):
             df_total['date'] = date
         if df_detail is not None:
             df_detail['date'] = date
+            df_detail['证券代码'] = df_detail['证券代码'].apply(lambda x: str(x).zfill(6))
         return df_total, df_detail
 
     def _get_pledge_info_total(self, date):
