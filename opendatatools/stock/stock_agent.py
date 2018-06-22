@@ -597,7 +597,15 @@ class CNInfoAgent(RestAgent):
             return None, '获取数据失败'
 
     def get_shareholder_structure(self, market, symbol):
-        url = 'http://www.cninfo.com.cn/information/lastest/%smb%s.html' % (market, symbol)
+
+        if symbol.startswith('002'):
+            board = 'sme'
+        elif symbol.startswith('3'):
+            board = 'cn'
+        else:
+            board = 'mb'
+
+        url = 'http://www.cninfo.com.cn/information/lastest/%s%s%s.html' % (market, board, symbol)
         response = self.do_request(url, encoding='gb18030')
         if response is None:
             return None, '获取数据失败'

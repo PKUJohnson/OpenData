@@ -76,10 +76,35 @@ if __name__ == '__main__':
     #print(msg)
 
     # 获取股本数据
-    #df, msg = stock.get_shareholder_structure('600000.SH')
+    #df, msg = stock.get_shareholder_structure('002511.SZ')
     #print(df)
 
     # 获取股权质押数据
-    df_total, df_detail = stock.get_pledge_info(market='SZ', date='2018-06-21')
-    print(df_detail)
+    #df_total, df_detail = stock.get_pledge_info(market='SZ', date='2018-06-21')
+    #print(df_detail)
 
+    df_total, df_detail = stock.get_pledge_info(market='SH', date='2018-06-21')
+    from progressbar import ProgressBar
+    data = []
+    progress_bar = ProgressBar().start(max_value=len(df_detail))
+    for index, row in df_detail.iterrows():
+        symbol = str(row['证券代码']) + '.SH'
+        #pledge_share = float(row['待购回无限售条件证券余量'].replace(',', '')) + float(row['待购回有限售条件证券余量'].replace(',', ''))
+        pledge_share = float(row['待购回余量（股/份/张）'].replace(',', ''))
+
+        df, msg = stock.get_shareholder_structure(symbol)
+        if df is None:
+            print('error occurs on ', symbol)
+            continue
+
+        total_share = float(df[df.indicator == '总股本'].iloc[0, 1].replace(',', ''))
+        tradable_share = float(df[df.indicator == '流通股'].iloc[0, 1].replace(',', ''))
+
+        data.append({'total_share': total_share, 'tradable_share': tradable_share, 'pledge_share': pledge_share,
+                     'pledge_ratio': pledge_share / total_share})
+
+        progress_bar.update(index + 1)
+
+    import pandas as pd
+    df = pd.DataFrame(data)
+    df
