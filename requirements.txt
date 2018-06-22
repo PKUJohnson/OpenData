@@ -3,3 +3,4 @@ bs4
 pandas
 demjson
 progressbar2
+pytesseract
