@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #print(msg)
 
     # 获取分钟线
-    #df, msg = stock.get_kline('600000.SH', '2018-06-12', '1m')
+    #df, msg = stock.get_kline('601318.SH', '2018-06-12', '1m')
     #print(df)
     #df, msg = stock.get_kline('000002.SZ', '2018-06-07', '1m')
     #print(df)
@@ -76,5 +76,10 @@ if __name__ == '__main__':
     #print(msg)
 
     # 获取股本数据
-    df, msg = stock.get_shareholder_structure('600000.SH')
-    print(df)
+    #df, msg = stock.get_shareholder_structure('600000.SH')
+    #print(df)
+
+    # 获取股权质押数据
+    df_total, df_detail = stock.get_pledge_info(market='SZ', date='2018-06-21')
+    print(df_detail)
+
