@@ -129,6 +129,7 @@ def fill_df(df, period, trade_date, symbol):
 
 # period 1m, 5m, 15m, 30m, 60m
 def get_kline(symbol, trade_date, period):
+    curr_date = datetime.datetime.strptime(trade_date, '%Y-%m-%d')
     next_date = datetime.datetime.strptime(trade_date, '%Y-%m-%d') + datetime.timedelta(days=1)
     timestamp = next_date.timestamp()
 
@@ -137,8 +138,8 @@ def get_kline(symbol, trade_date, period):
     if df is None:
         return df, msg
 
-    df = df[df.time < next_date]
-    if len(df) < xq_count_map[period]:
+    df = df[(df.time < next_date) & (df.time >= curr_date)]
+    if len(df) < abs(xq_count_map[period]):
         df_new = fill_df(df, period, trade_date, symbol)
         return df_new, ''
     else:
