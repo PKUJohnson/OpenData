@@ -91,7 +91,7 @@ class SHExAgent(RestAgent):
             df_detail = excel.parse('交易数量明细').dropna()
             df_total['date'] = date
             df_detail['date'] = date
-			df_detail['证券代码'] = df_detail['证券代码'].apply(lambda x : x.zfill(6))
+            df_detail['证券代码'] = df_detail['证券代码'].apply(lambda x : x.zfill(6))
             return df_total, df_detail
         else:
             return None, None
@@ -543,6 +543,10 @@ class CNInfoAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
 
+    @staticmethod
+    def clear_text(text):
+        return text.replace('\n', '').strip()
+
     def _parse_report_file(self, file):
         lines = file.readlines()
         data_list = []
@@ -603,38 +607,21 @@ class CNInfoAgent(RestAgent):
 
         data = []
         for div in divs:
-            if div.has_attr('class') and 'tagmain' in div['class']:
+            if div.has_attr('class') and 'clear' in div['class']:
                 tables = div.find_all('table')
 
                 for table in tables:
-                    if table.has_attr('id') and table['id'] == 'FundHoldSharesTable':
-                        rows = table.findAll('tr')
-                        for row in rows:
-                            cols = row.findAll('td')
-                            if len(cols) == 8:
-                                date = SinaAgent.clear_text(cols[0].text)
-                                adjust_factor = SinaAgent.clear_text(cols[7].text)
+                    rows = table.findAll('tr')
+                    for row in rows:
+                        cols = row.findAll('td')
+                        if len(cols) == 2:
+                            indicator = CNInfoAgent.clear_text(cols[0].text).replace('：', '')
+                            value     = CNInfoAgent.clear_text(cols[1].text)
 
-                                if date == '日期':
-                                    continue
+                            data.append({
+                                "indicator": indicator,
+                                "value"    : value,
+                            })
 
-                                data.append({
-                                    "date": date,
-                                    "adjust_factor": adjust_factor,
-                                })
-
-        result_list.extend(data)
-        if len(data) == 0:
-            no_data_cnt = no_data_cnt + 1
-            if no_data_cnt >= 3:
-                break
-
-        # prepare for next round
-        if curr_quarter == 1:
-            curr_year = curr_year - 1
-            curr_quarter = 4
-        else:
-            curr_quarter = curr_quarter - 1
-
-    return pd.DataFrame(result_list), ""
+        return pd.DataFrame(data), ""
 
