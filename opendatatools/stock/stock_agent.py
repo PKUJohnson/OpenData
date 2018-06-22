@@ -598,7 +598,7 @@ class CNInfoAgent(RestAgent):
 
     def get_shareholder_structure(self, market, symbol):
         url = 'http://www.cninfo.com.cn/information/lastest/%smb%s.html' % (market, symbol)
-        response = self.do_request(url)
+        response = self.do_request(url, encoding='gb18030')
         if response is None:
             return None, '获取数据失败'
 
@@ -622,6 +622,7 @@ class CNInfoAgent(RestAgent):
                                 "indicator": indicator,
                                 "value"    : value,
                             })
+                break
 
         return pd.DataFrame(data), ""
 
