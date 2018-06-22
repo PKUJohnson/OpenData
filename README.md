@@ -1,4 +1,4 @@
-# OpenData
+# OpenDataTools
 开源的数据提取工具，专注在各类网站上爬取数据，并通过简单易用的API方式使用
 
 ![](https://github.com/PKUJohnson/OpenData/blob/master/image/logo.png)
