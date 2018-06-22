@@ -224,5 +224,11 @@ def get_report_data(symbol='600000.SH', type='资产负债表'):
 
     data = symbol.split(sep='.')
     market = data[1].lower()
-    sym = data[0]
-    return cninfo_agent.get_report_data(market, sym, dict_type[type])
+    code = data[0]
+    return cninfo_agent.get_report_data(market, code, dict_type[type])
+
+def get_shareholder_structure(symbol='600000.SH'):
+    data = symbol.split(sep='.')
+    market = data[1].lower()
+    code = data[0]
+    return cninfo_agent.get_shareholder_structure(market, code)

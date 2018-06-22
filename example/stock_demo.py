@@ -70,7 +70,11 @@ if __name__ == '__main__':
     #print(msg)
 
     # 获取财务报表数据
-    df, msg = stock.get_report_data('000002.SZ', type='利润表')
+    #df, msg = stock.get_report_data('000002.SZ', type='利润表')
     #df, msg = stock.get_report_data('600000.SH', type='fzb')
-    print(df[df['报告年度'] == '2017-12-31'].T)
-    print(msg)
+    #print(df[df['报告年度'] == '2017-12-31'].T)
+    #print(msg)
+
+    # 获取股本数据
+    df, msg = stock.get_shareholder_structure('600000.SH')
+    print(df)

@@ -2,6 +2,8 @@
 开源的数据提取工具，专注在各类网站上爬取数据，并通过简单易用的API方式使用
 
 ## Release Notes
++ 2018-06-22 : 0.3.8 add pledge and financial report data for stock, add shareholder structure for stock (增加股权质押，财务报表，股本数据)
++ 2018-06-21 : 0.3.7 add spot interface (黑色商品现货指标)
 + 2018-06-20 : 0.3.6 fix some bug for realestate Interface
 + 2018-06-20 : 0.3.5 add worldcup Interface（增加世界杯数据接口）
 + 2018-06-19 : 0.3.0 add fund Interface（增加开放式基金接口）
