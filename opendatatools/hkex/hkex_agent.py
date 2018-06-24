@@ -21,7 +21,10 @@ class HKExAgent(RestAgent):
         if market == "SH":
             return "60" + code[1:] + ".SH"
         else:
-            return "00" + code[1:] + ".SZ"
+            if code.startswith('77'):
+                return "300" + code[2:] + ".SZ"
+            else:
+                return "00" + code[1:] + ".SZ"
 
     def get_lgt_share(self, market='SH', date = None):
         url = "http://sc.hkexnews.hk/TuniS/www.hkexnews.hk/sdw/search/mutualmarket_c.aspx?t=%s" % (market)
