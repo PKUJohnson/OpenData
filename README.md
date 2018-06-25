@@ -4,6 +4,7 @@
 ![](https://github.com/PKUJohnson/OpenData/blob/master/image/logo.png)
 
 ## Release Notes
++ 2018-06-24 : 0.4.3 add usstock interface, fix some bugs
 + 2018-06-22 : 0.3.8 add pledge and financial report data for stock, add shareholder structure for stock (增加股权质押，财务报表，股本数据)
 + 2018-06-21 : 0.3.7 add spot interface (黑色商品现货指标)
 + 2018-06-20 : 0.3.6 fix some bug for realestate Interface
