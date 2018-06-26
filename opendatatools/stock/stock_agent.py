@@ -634,3 +634,62 @@ class CNInfoAgent(RestAgent):
 
         return pd.DataFrame(data), ""
 
+class EastMoneyAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+
+    def get_hist_money_flow(self, symbol):
+        url = 'http://ff.eastmoney.com//EM_CapitalFlowInterface/api/js?type=hff&rtntype=2&js={"data":(x)}&check=TMLBMSPROCR&acces_token=1942f5da9b46b069953c873404aad4b5&id=%s1' % symbol
+        response = self.do_request(url)
+        if response is None:
+            return None, '获取数据失败'
+
+        jsonobj = json.loads(response)
+        result = []
+        for data in jsonobj['data']:
+            items = data.split(',')
+            result.append({
+                'Time': items[0],
+                'ZLJLRJE': items[1],
+                'ZLJLRZB': items[2],
+                'CDDJLRJE': items[3],
+                'CDDJLRZB': items[4],
+                'DDLRJE': items[5],
+                'DDLRZB': items[6],
+                'ZDLRJE': items[7],
+                'ZDLRZB': items[8],
+                'XDLRJE': items[9],
+                'XDLRZB': items[10],
+            })
+
+        return pd.DataFrame(result), ''
+
+    def get_realtime_money_flow(self, symbol):
+        url = 'http://ff.eastmoney.com/EM_CapitalFlowInterface/api/js?id=%s1&type=ff&check=MLBMS&js={(x)}&rtntype=3&acces_token=1942f5da9b46b069953c873404aad4b5' % symbol
+        response = self.do_request(url)
+        if response is None:
+            return None, '获取数据失败'
+
+        jsonobj = json.loads(response)
+        result = {}
+        result['Time'] = jsonobj['xa'].split(',')
+        result['ZLJLRJE']  = list()
+        result['CDDJLRJE'] = list()
+        result['DDJLRJE']  = list()
+        result['ZDJLRJE']  = list()
+        result['XDJLRJE']  = list()
+        for data in jsonobj['ya']:
+            items = data.split(',')
+            result['ZLJLRJE'].append(items[0])
+            result['CDDJLRJE'].append(items[1])
+            result['DDJLRJE'].append(items[2])
+            result['ZDJLRJE'].append(items[3])
+            result['XDJLRJE'].append(items[4])
+
+        df = pd.DataFrame().from_dict(result, orient='index').T
+        df.dropna(inplace=True)
+        return df, ''
+
+
+
+

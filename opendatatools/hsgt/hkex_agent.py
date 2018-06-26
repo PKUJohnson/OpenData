@@ -4,7 +4,6 @@ import numpy as np
 import datetime
 
 from opendatatools.common import RestAgent, get_current_day, date_convert
-from opendatatools.aqi.constant import city_code_map
 
 class HKExAgent(RestAgent):
     def __init__(self):

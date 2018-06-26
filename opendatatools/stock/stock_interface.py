@@ -2,7 +2,7 @@
 
 import datetime
 
-from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent, SinaAgent, CNInfoAgent
+from .stock_agent import SHExAgent, SZExAgent, CSIAgent, XueqiuAgent, SinaAgent, CNInfoAgent, EastMoneyAgent
 from opendatatools.common import get_current_day
 
 shex_agent   = SHExAgent()
@@ -11,7 +11,7 @@ csi_agent    = CSIAgent()
 xq_agent     = XueqiuAgent()
 sina_agent   = SinaAgent()
 cninfo_agent = CNInfoAgent()
-cninfo_agent  = CNInfoAgent()
+eastmoney_agent = EastMoneyAgent()
 
 xq_count_map = {
     '1m': -240,
@@ -233,3 +233,17 @@ def get_shareholder_structure(symbol='600000.SH'):
     market = data[1].lower()
     code = data[0]
     return cninfo_agent.get_shareholder_structure(market, code)
+
+# 单位：百万元
+def get_hist_money_flow(symbol):
+    data = symbol.split(sep='.')
+    market = data[1].lower()
+    code = data[0]
+    return eastmoney_agent.get_hist_money_flow(code)
+
+# 单位：万元
+def get_realtime_money_flow(symbol):
+    data = symbol.split(sep='.')
+    market = data[1].lower()
+    code = data[0]
+    return eastmoney_agent.get_realtime_money_flow(code)

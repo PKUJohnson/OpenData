@@ -73,8 +73,8 @@ if __name__ == '__main__':
     #print(msg)
 
     # 获取分钟线
-    df, msg = stock.get_kline('000002.SZ', '2018-06-21', '1m')
-    print(df)
+    #df, msg = stock.get_kline('000002.SZ', '2018-06-21', '1m')
+    #print(df)
     #df, msg = stock.get_kline('000002.SZ', '2018-06-07', '1m')
     #print(df)
     #print(msg)
@@ -113,7 +113,11 @@ if __name__ == '__main__':
     #df_total, df_detail = stock.get_pledge_info(market='SZ', date='2018-06-21')
     #print(df_detail)
 
-
-
-    #df_sz = get_pledge_info('SZ', '2018-06-21')
+    #df_sz = stock.get_pledge_info('SZ', '2018-06-21')
     #print(df_sz)
+
+    #df, msg = stock.get_hist_money_flow('600000.SH')
+    #print(df)
+
+    #df, msg = stock.get_realtime_money_flow('600030.SH')
+    #print(df)
