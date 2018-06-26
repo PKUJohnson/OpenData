@@ -44,8 +44,6 @@ class EastMoneyAgent(RestAgent):
 
         return None, '获取数据失败'
 
-    # HSMoney : 沪市北向资金  SSMoney : 深市北向资金  NorthMoney : 北向资金汇总
-    # GGHSMoney : 港股沪市资金  GGSSMoney : 港股深市资金  SouthSumMoney ：南向资金汇总
     def get_hist_moneyflow(self):
         url = 'http://dcfm.eastmoney.com/EM_MutiSvcExpandInterface/api/js/get?type=HSGTZJZS&token=70f12f2f4f091e459a279469fe49eca5&js={"data":(x)}'
         response = self.do_request(url)

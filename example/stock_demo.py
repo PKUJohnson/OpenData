@@ -121,3 +121,9 @@ if __name__ == '__main__':
 
     #df, msg = stock.get_realtime_money_flow('600030.SH')
     #print(df)
+
+    #df, msg = stock.get_hist_money_flow_market()
+    #print(df)
+
+    df, msg = stock.get_realtime_money_flow_market()
+    print(df)

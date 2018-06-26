@@ -247,3 +247,10 @@ def get_realtime_money_flow(symbol):
     market = data[1].lower()
     code = data[0]
     return eastmoney_agent.get_realtime_money_flow(code)
+
+# 单位：亿元
+def get_realtime_money_flow_market():
+    return eastmoney_agent.get_realtime_money_flow_market()
+
+def get_hist_money_flow_market():
+    return eastmoney_agent.get_hist_money_flow_market()

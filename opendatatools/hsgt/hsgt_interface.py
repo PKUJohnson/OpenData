@@ -33,6 +33,8 @@ def get_lgt_share(market = 'SH', date = None):
 def get_realtime_moneyflow():
     return eastmoney_agent.get_realtime_moneyflow()
 
+# HSMoney : 沪市北向资金  SSMoney : 深市北向资金  NorthMoney : 北向资金汇总
+# GGHSMoney : 港股沪市资金  GGSSMoney : 港股深市资金  SouthSumMoney ：南向资金汇总
 # 单位：百万元
 def get_hist_moneyflow():
     return eastmoney_agent.get_hist_moneyflow()

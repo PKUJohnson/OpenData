@@ -638,12 +638,7 @@ class EastMoneyAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
 
-    def get_hist_money_flow(self, symbol):
-        url = 'http://ff.eastmoney.com//EM_CapitalFlowInterface/api/js?type=hff&rtntype=2&js={"data":(x)}&check=TMLBMSPROCR&acces_token=1942f5da9b46b069953c873404aad4b5&id=%s1' % symbol
-        response = self.do_request(url)
-        if response is None:
-            return None, '获取数据失败'
-
+    def _parse_hist_money_flow(self, response):
         jsonobj = json.loads(response)
         result = []
         for data in jsonobj['data']:
@@ -661,11 +656,36 @@ class EastMoneyAgent(RestAgent):
                 'XDLRJE': items[9],
                 'XDLRZB': items[10],
             })
+        return pd.DataFrame(result)
 
-        return pd.DataFrame(result), ''
+    def _get_hist_money_flow(self, url):
+        response = self.do_request(url)
+        if response is None:
+            return None, '获取数据失败'
 
-    def get_realtime_money_flow(self, symbol):
-        url = 'http://ff.eastmoney.com/EM_CapitalFlowInterface/api/js?id=%s1&type=ff&check=MLBMS&js={(x)}&rtntype=3&acces_token=1942f5da9b46b069953c873404aad4b5' % symbol
+        df = self._parse_hist_money_flow(response)
+        return df, ''
+
+    def get_hist_money_flow(self, symbol):
+        url = 'http://ff.eastmoney.com//EM_CapitalFlowInterface/api/js?type=hff&rtntype=2&js={"data":(x)}&check=TMLBMSPROCR&acces_token=1942f5da9b46b069953c873404aad4b5&id=%s1' % symbol
+        return self._get_hist_money_flow(url)
+
+    def get_hist_money_flow_market(self):
+        url = 'http://data.eastmoney.com/zjlx/dpzjlx.html'
+        response = self.do_request(url)
+        if response is None:
+            return None, '获取数据失败'
+
+        # get data from html
+        idx  = response.find('var DefaultJson=')
+        idx1 = response.find('[', idx)
+        idx2 = response.find(']', idx)
+        json_rsp = '{ "data": ' + response[idx1:idx2+1] + '}'
+
+        df = self._parse_hist_money_flow(json_rsp)
+        return df, ''
+
+    def _get_realtime_money_flow(self, url):
         response = self.do_request(url)
         if response is None:
             return None, '获取数据失败'
@@ -690,6 +710,13 @@ class EastMoneyAgent(RestAgent):
         df.dropna(inplace=True)
         return df, ''
 
+    def get_realtime_money_flow(self, symbol):
+        url = 'http://ff.eastmoney.com/EM_CapitalFlowInterface/api/js?id=%s1&type=ff&check=MLBMS&js={(x)}&rtntype=3&acces_token=1942f5da9b46b069953c873404aad4b5' % symbol
+        return self._get_realtime_money_flow(url)
+
+    def get_realtime_money_flow_market(self):
+        url = 'http://ff.eastmoney.com/EM_CapitalFlowInterface/api/js?id=ls&type=ff&check=MLBMS&js={(x)}&rtntype=3&acces_token=1942f5da9b46b069953c873404aad4b5'
+        return self._get_realtime_money_flow(url)
 
 
 
