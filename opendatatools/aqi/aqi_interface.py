@@ -36,3 +36,6 @@ def get_daily_aqi(date):
 def get_daily_aqi_onecity(city):
     return aqi_agent.get_daily_aqi_onecity(city)
 
+# recent 30 days
+def get_recent_daily_aqi_onecity(city):
+    return aqi_agent.get_recent_daily_aqi_onecity()

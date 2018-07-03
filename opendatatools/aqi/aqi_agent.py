@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+from opendatatools.common import get_current_day
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
@@ -172,6 +173,47 @@ class AQIAgent(RestAgent):
             aqi_result.extend(data)
 
         df = pd.DataFrame(aqi_result)
+        return df
+
+    def get_recent_daily_aqi_onecity(self, city):
+        url = 'http://datacenter.mep.gov.cn/websjzx/report!list.vm'
+        if city not in city_code_map:
+            print("this city is not ready !" + city)
+            return None
+
+        city_code = city_code_map[city]
+
+        data = {
+            'citycodes': city_code,
+            'citytime': get_current_day(),
+            'xmlname': "1513844769596kqzllb"
+        }
+
+        rsp = self.do_request(url, data, self.proxies)
+
+        # 2. 开始解析返回数据，并从html中提取需要的内容
+        data = list()
+        soup = BeautifulSoup(rsp, "html5lib")
+        divs = soup.find_all('div')
+
+        for div in divs:
+            if div.has_attr('class') and 'report_main' in div['class']:
+                rows = div.table.findAll('tr')
+                for row in rows:
+                    cols = row.findAll('td')
+                    if len(cols) == 7:
+                        date = cols[1].text
+                        aqi  = cols[3].text
+                        level = cols[5].text
+                        indicator = cols[4].text
+                        data.append({
+                            "date" : date,
+                            "aqi"  : aqi,
+                            "level" : level,
+                            "indicator" : indicator,
+                        })
+
+        df = pd.DataFrame(data)
         return df
 
     def get_hour_aqi_onecity(self, city, date):
