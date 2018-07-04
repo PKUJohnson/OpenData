@@ -237,15 +237,23 @@ def get_shareholder_structure(symbol='600000.SH'):
 # 单位：百万元
 def get_hist_money_flow(symbol):
     data = symbol.split(sep='.')
-    market = data[1].lower()
-    code = data[0]
+    market = data[1]
+    if market == 'SH':
+        marketnum = '1'
+    else:
+        marketnum = '2'
+    code = data[0]+marketnum
     return eastmoney_agent.get_hist_money_flow(code)
 
 # 单位：万元
 def get_realtime_money_flow(symbol):
     data = symbol.split(sep='.')
-    market = data[1].lower()
-    code = data[0]
+    market = data[1]
+    if market == 'SH':
+        marketnum = '1'
+    else:
+        marketnum = '2'
+    code = data[0]+marketnum
     return eastmoney_agent.get_realtime_money_flow(code)
 
 # 单位：亿元
@@ -254,3 +262,5 @@ def get_realtime_money_flow_market():
 
 def get_hist_money_flow_market():
     return eastmoney_agent.get_hist_money_flow_market()
+def get_allstock_flow():
+    return eastmoney_agent.get_allstock_flow()
