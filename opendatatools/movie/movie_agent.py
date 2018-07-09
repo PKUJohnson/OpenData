@@ -58,7 +58,9 @@ class MovieAgent(RestAgent):
             return None, '获取数据失败'
 
         jsonobj = json.loads(response)
-        return pd.DataFrame(jsonobj['data1']), ''
+        df = pd.DataFrame(jsonobj['data1'])
+        df['date'] = jsonobj['data2'][0]['BoxDate']
+        return df, ''
 
     def get_monthly_boxoffice(self, date):
         url = 'http://www.cbooo.cn/BoxOffice/getMonthBox?sdate=%s' % (date)

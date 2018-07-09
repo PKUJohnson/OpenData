@@ -11,8 +11,8 @@ if __name__ == "__main__":
     #df, msg = movie.get_realtime_boxoffice()
     #print(df)
 
-    #df, msg = movie.get_recent_boxoffice(5)
-    #print(df)
+    df, msg = movie.get_recent_boxoffice(5)
+    print(df)
 
     #df, msg = movie.get_monthly_boxoffice('2018-06-01')
     #print(df)
