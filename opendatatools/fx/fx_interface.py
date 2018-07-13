@@ -1,7 +1,8 @@
 # encoding: utf-8
 
 from .chinamoney_agent import ChinaMoneyAgent
-from opendatatools.common import date_convert, get_current_day, get_target_date
+from opendatatools.common import date_convert, get_current_day, get_target_date, get_target_date2
+import pandas as pd
 
 chinamoney_agent = ChinaMoneyAgent()
 
@@ -14,13 +15,44 @@ def format_date_param(start_date, end_date):
 
     return start_date, end_date
 
+def _split_qry_range(start_date, end_date):
+    list_qry_date = []
+    p_start_date = start_date
+    while True:
+        p_end_date   = get_target_date2(p_end_date, 360)
+        if p_end_date > end_date:
+            p_end_date = end_date
+        list_qry_date.append((p_start_date, p_end_date))
+
+        p_start_date = get_target_date2(p_end_date, 1)
+        if p_start_date > end_date:
+            break
+
+    return list_qry_date
+
 def get_hist_cny_cpr(start_date = None, end_date = None):
     start_date, end_date = format_date_param(start_date, end_date)
-    return chinamoney_agent.get_hist_cny_cpr(start_date, end_date)
+    list_qry_date = _split_qry_range(start_date, end_date)
+    df_list = []
+    for p_start_date, p_end_date in list_qry_date:
+        df, msg = chinamoney_agent.get_hist_cny_cpr(p_start_date, p_end_date)
+        if df is None:
+            return df, msg
+        df_list.append(df)
+
+    return pd.concat(df_list), ""
 
 def get_his_shibor(start_date = None, end_date = None):
     start_date, end_date = format_date_param(start_date, end_date)
-    return chinamoney_agent.get_his_shibor(start_date, end_date)
+    list_qry_date = _split_qry_range(start_date, end_date)
+    df_list = []
+    for p_start_date, p_end_date in list_qry_date:
+        df, msg = chinamoney_agent.get_his_shibor(p_start_date, p_end_date)
+        if df is None:
+            return df, msg
+        df_list.append(df)
+
+    return pd.concat(df_list), ""
 
 def get_realtime_shibor():
     return chinamoney_agent.get_realtime_shibor()
