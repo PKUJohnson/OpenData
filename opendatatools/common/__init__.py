@@ -4,5 +4,6 @@ from .rest_agent import *
 from .date_util import *
 from .string_util import *
 from .ui_util import *
+from .md5_util import *
 
 __all__ = ['RestAgent']
