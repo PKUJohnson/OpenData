@@ -8,48 +8,33 @@ import pandas as pd
 import re
 
 lianjia_city_map = {
-    '北京市' : 'bj',
-    '上海市' : 'sh',
+    '北京' : 'bj',
+    '上海' : 'sh',
+    '成都' : 'cd',
+    '杭州' : 'hz',
+    '广州' : 'gz',
+    '深圳' : 'sz',
+    '厦门' : 'xm',
+    '苏州' : 'su',
+    '重庆' : 'cq',
+    '长沙' : 'cs',
+    '大连' : 'dl',
+    '海口' : 'hk',
+    '合肥' : 'hf',
+    '济南' : 'jn',
+    '青岛' : 'qd',
+    '南京' : 'nj',
+    '石家庄': 'sjz',
+    '沈阳' : 'sy',
+    '天津' : 'tj',
+    '武汉' : 'wh',
+    '无锡' : 'wx',
+    '西安' : 'xa',
+    '烟台' : 'yt',
+    '中山' : 'zs',
+    '珠海' : 'zh',
+    '郑州' : 'zz',
 }
-
-district_map = {
-    '东城':'dongcheng',
-    '西城':'xicheng',
-    '朝阳':'chaoyang',
-    '海淀':'haidian',
-    '丰台':'fengtai',
-    '石景山':'shijingshan',
-    '通州':'tongzhou',
-    '昌平':'changping',
-    '大兴':'daxing',
-    '亦庄':'yizhuangkaifaqu',
-    '顺义':'shunyi',
-    '房山':'fangshan',
-    '门头沟':'mentougou',
-    '平谷':'pinggu',
-    '怀柔':'huairou',
-    '密云':'miyun',
-    '延庆':'yanqing',
-
-    '浦东': 'pudong',
-    '闵行': 'minhang',
-    '宝山': 'baoshan',
-    '徐汇': 'xuhui',
-    '普陀': 'putuo',
-    '杨浦': 'yangpu',
-    '长宁': 'changning',
-    '松江': 'songjiang',
-    '嘉定': 'jiading',
-    '黄浦': 'huangpu',
-    '静安': 'jingan',
-    '闸北': 'zhabei',
-    '虹口': 'hongkou',
-    '青浦': 'qingpu',
-    '奉贤': 'fengxian',
-    '金山': 'jinshan',
-    '崇明': 'chongming',
-}
-
 
 class LianjiaAgent(RestAgent):
     def __init__(self):
@@ -58,8 +43,28 @@ class LianjiaAgent(RestAgent):
     def get_city_list(self):
         return lianjia_city_map.keys()
 
-    def get_district_list(self):
-        return district_map.keys()
+    def get_district_by_city(self, city):
+        city_code = lianjia_city_map[city]
+        url = 'https://%s.lianjia.com/ershoufang/' % city_code
+        response = self.do_request(url)
+
+        soup = BeautifulSoup(response, "html5lib")
+        divs = soup.find_all('div')
+
+        data_map = {}
+        for div in divs:
+            if div.has_attr('data-role') and 'ershoufang' in div['data-role']:
+                sub_divs = div.find_all('div')
+                sub_div  = sub_divs[0]
+                links = sub_div.find_all('a')
+                for link in links:
+                    #link_addr = link
+                    #data_list.append(data)
+                    key   = link.text
+                    value = link['href'].replace('/ershoufang/', '').replace('/', '')
+                    data_map[key] = value
+
+        return data_map
 
     @staticmethod
     def clear_text(text):
@@ -79,6 +84,7 @@ class LianjiaAgent(RestAgent):
         if city in lianjia_city_map:
             city_code = lianjia_city_map[city]
 
+        district_map = self.get_district_by_city(city)
         if district in district_map:
             district_code = district_map[district]
 
