@@ -5,7 +5,7 @@
 
 ## install
 
-声明：本工具只支持 **** python3 ****，请安装python3.6以上版本。没有支持python2的计划。
+声明：本工具只支持 **python3**，请安装python3.6以上版本。没有支持python2的计划。
 
 1. 直接从pypi上安装：pip install opendatatools
 
