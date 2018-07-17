@@ -10,11 +10,12 @@ if __name__ == '__main__':
     user_info, msg = hedgefund.login('18612562791', 'a123456')
 
     # 加载数据
-    hedgefund.load_data()
+    #hedgefund.load_data()
 
     # 获取私募基金列表
-    df, msg = hedgefund.get_fund_list()
-    print(df)
+    #df, msg = hedgefund.get_fund_list()
+    #print(df)
 
-    df, msg = hedgefund.get_fund_nav('HF000025PG')
+    df, msg = hedgefund.get_fund_nav('HF00004571')
+
     print(df)
