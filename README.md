@@ -3,6 +3,10 @@
 
 ![](https://github.com/PKUJohnson/OpenData/blob/master/image/logo.png)
 
+## qq群讨论
+
+![](https://github.com/quantOS-org/quantOSUserGuide/blob/master/assets/quantos-qq.jpg?raw=true)
+
 ## install
 
 声明：本工具只支持 **python3**，请安装python3.6以上版本。没有支持python2的计划。
