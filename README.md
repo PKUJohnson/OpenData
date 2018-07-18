@@ -5,7 +5,7 @@
 
 ## install
 
-声明：本工具只支持 **** python3 ****，请安装python3.6以上版本。没有支持python2的计划。
+声明：本工具只支持 **python3**，请安装python3.6以上版本。没有支持python2的计划。
 
 1. 直接从pypi上安装：pip install opendatatools
 
@@ -36,6 +36,12 @@ print(df)
 ## demo
 
 please see [wiki](https://github.com/PKUJohnson/OpenData/wiki)
+
+
+## qq群讨论
+
+![](https://github.com/quantOS-org/quantOSUserGuide/blob/master/assets/quantos-qq.jpg?raw=true)
+
 
 ## Release Notes
 + 2018-07-03 : 0.4.7 add hsgt interface, remove hkex interface, add stock interface (股票接口增加资金流信息、沪深港通接口扩展)
