@@ -39,7 +39,6 @@ class GaokaoAgent(RestAgent):
         return df, msg
 
 if __name__ == "__main__":
-
     agent = GaokaoAgent()
     df, msg = agent.get_batch_score('北京', '理科')
     print(df)
