@@ -271,3 +271,130 @@ class CFEAgent(RestAgent):
             df_list.append(df_tmp)
 
         return _merge_df(df_list)
+
+
+class SinaFuturesAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+        self.dict_market_map = {
+            '沪' : 'SHF',
+            '连' : 'DCE',
+            '郑' : 'CZC',
+            '油' : 'INE',
+        }
+
+    def convert_market(self, market, product=''):
+        if product == '原油':
+            return 'INE'
+        else:
+            return self.dict_market_map[market]
+
+    def _parse_quote_rsp(self, rsp):
+        lines = rsp.split('\n')
+        list_quotes = []
+        for line in lines:
+            quote = self._parse_quote_str(line)
+            if quote is not None:
+                list_quotes.append(quote)
+
+        return pd.DataFrame(list_quotes)
+
+    def _is_cfe_code(self, code):
+        code2 = code
+        for i in range(10):
+            code2 = code2.replace(str(i), '')
+
+        if code2 in ['IF', 'IC', 'IH', 'T', 'TF']:
+            return True
+        else:
+            return False
+
+    def _parse_quote_str(self, line):
+        line = line.replace('var hq_str_', '')
+        line = line.replace('CFF_RE_', '')
+
+        items = line.split('=')
+
+        if len(items) < 2:
+            return None
+
+        code = items[0]
+        quote_str = items[1].replace('"', '').replace(';', '')
+
+        fields = quote_str.split(',')
+
+        if self._is_cfe_code(code):
+            pass
+        else:
+            if len(fields) < 18 :
+                return None
+
+            quote = {
+                'code'     : code,
+                'instname' : fields[0],
+                'time'     : fields[1],
+                'open'     : fields[2],
+                'high'     : fields[3],
+                'low'      : fields[4],
+                'preclose' : fields[5],
+                'bidprice1': fields[6],
+                'askprice1': fields[7],
+                'last'      : fields[8],
+                'settle'    : fields[9],
+                'presettle' : fields[10],
+                'askvol1'   : fields[11],
+                'bidvol1'   : fields[12],
+                'oi'        : fields[13],
+                'volume'   : fields[14],
+                'exchange' : self.convert_market(fields[15]),
+                'product'  : fields[16],
+                'date'     : fields[17],
+            }
+
+            return quote
+
+    def get_quote(self, codes):
+        url = 'http://hq.sinajs.cn/list=%s' % codes
+        response = self.do_request(url)
+        if response is None:
+            return None, '获取数据失败'
+
+        df = self._parse_quote_rsp(response)
+        return df, ''
+
+    # 1m, 5m, 15m, 30m, 60m, 1d
+    def get_kline(self, type, code):
+
+        if self._is_cfe_code(code):
+
+            if type not in ['5m', '15m', '60m', '1d']:
+                return None, '不支持的K线类型'
+
+            if type == '1d':
+                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/CffexFuturesService.getCffexFuturesDailyKLine?%s' % (code)
+            else:
+                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/CffexFuturesService.getCffexFuturesMiniKLine%s?symbol=%s' % (type, code)
+        else:
+            if type not in ['1m', '5m', '15m', '30m', '60m', '1d']:
+                return None, '不支持的K线类型'
+
+            if type == '1d':
+                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine?%s' % (code)
+            else:
+                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesMiniKLine%s?symbol=%s' % (type, code)
+
+        response = self.do_request(url)
+        if response is None or response == 'null':
+            return None, '获取数据失败'
+
+        jsonobj = json.loads(response)
+        df = pd.DataFrame(jsonobj)
+        df.columns = ['datetime', 'open', 'high', 'low', 'close', 'volume']
+
+        return df, ''
+
+if __name__ == '__main__':
+    agent = SinaFuturesAgent()
+    df, msg = agent.get_kline('5m', 'IF1807')
+    print(df)
+

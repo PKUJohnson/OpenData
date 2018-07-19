@@ -1,12 +1,13 @@
 # encoding: utf-8
 
-from .futures_agent import SHFAgent, DCEAgent, CZCAgent, CFEAgent
+from .futures_agent import SHFAgent, DCEAgent, CZCAgent, CFEAgent, SinaFuturesAgent
 from opendatatools.common import get_target_date, date_convert
 
 shf_agent = SHFAgent()
 dce_agent = DCEAgent()
 czc_agent = CZCAgent()
 cfe_agent = CFEAgent()
+sina_agent = SinaFuturesAgent()
 
 def get_trade_rank(market = 'SHF', date = None):
     if date is None:
@@ -26,4 +27,8 @@ def get_trade_rank(market = 'SHF', date = None):
 
     return None, '不支持的市场类型'
 
+def get_quote(codes):
+    return sina_agent.get_quote(codes)
 
+def get_kline(type, code):
+    return sina_agent.get_kline(type, code)
