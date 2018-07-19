@@ -371,15 +371,15 @@ class SinaFuturesAgent(RestAgent):
                 return None, '不支持的K线类型'
 
             if type == '1d':
-                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/CffexFuturesService.getCffexFuturesDailyKLine?%s' % (code)
+                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/CffexFuturesService.getCffexFuturesDailyKLine?symbol=%s' % (code)
             else:
                 url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/CffexFuturesService.getCffexFuturesMiniKLine%s?symbol=%s' % (type, code)
         else:
-            if type not in ['1m', '5m', '15m', '30m', '60m', '1d']:
+            if type not in ['5m', '15m', '30m', '60m', '1d']:
                 return None, '不支持的K线类型'
 
             if type == '1d':
-                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine?%s' % (code)
+                url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine?symbol=%s' % (code)
             else:
                 url = 'http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesMiniKLine%s?symbol=%s' % (type, code)
 
@@ -395,6 +395,6 @@ class SinaFuturesAgent(RestAgent):
 
 if __name__ == '__main__':
     agent = SinaFuturesAgent()
-    df, msg = agent.get_kline('5m', 'IF1807')
+    df, msg = agent.get_kline('1d', 'RB1809')
     print(df)
 
