@@ -393,8 +393,3 @@ class SinaFuturesAgent(RestAgent):
 
         return df, ''
 
-if __name__ == '__main__':
-    agent = SinaFuturesAgent()
-    df, msg = agent.get_kline('1d', 'RB1809')
-    print(df)
-

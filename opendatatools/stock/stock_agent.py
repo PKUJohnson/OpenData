@@ -101,7 +101,8 @@ class SZExAgent(RestAgent):
         RestAgent.__init__(self)
 
     def get_index_list(self):
-        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        #url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        url = 'http://www.szse.cn/api/report/ShowReport'
         data = {
             'SHOWTYPE'  : 'xls',
             'CATALOGID' : '1812',
@@ -112,7 +113,8 @@ class SZExAgent(RestAgent):
         return df
 
     def get_index_component(self, index):
-        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        #url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        url = 'http://www.szse.cn/api/report/ShowReport'
         data = {
             'SHOWTYPE': 'xls',
             'CATALOGID': '1747',
@@ -136,7 +138,8 @@ class SZExAgent(RestAgent):
         return df_total, df_detail
 
     def _get_rzrq_total(self, date):
-        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        #url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        url = 'http://www.szse.cn/api/report/ShowReport'
         data = {
             'SHOWTYPE': 'xls',
             'CATALOGID': '1837_xxpl',
@@ -152,7 +155,8 @@ class SZExAgent(RestAgent):
             return None
 
     def _get_rzrq_detail(self, date):
-        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        #url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        url = 'http://www.szse.cn/api/report/ShowReport'
         data = {
             'SHOWTYPE': 'xls',
             'CATALOGID': '1837_xxpl',
@@ -178,7 +182,8 @@ class SZExAgent(RestAgent):
         return df_total, df_detail
 
     def _get_pledge_info_total(self, date):
-        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        #url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        url = 'http://www.szse.cn/api/report/ShowReport'
         data = {
             'SHOWTYPE': 'xls',
             'CATALOGID': '1837_gpzyhgxx',
@@ -196,7 +201,8 @@ class SZExAgent(RestAgent):
 
 
     def _get_pledge_info_detail(self, date):
-        url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        #url = 'http://www.szse.cn/szseWeb/ShowReport.szse'
+        url = 'http://www.szse.cn/api/report/ShowReport'
         data = {
             'SHOWTYPE': 'xls',
             'CATALOGID': '1837_gpzyhgxx',
@@ -204,6 +210,7 @@ class SZExAgent(RestAgent):
             "txtDate" : date,
             'ENCODE'  : 1,
         }
+
 
         response = self.do_request(url, data, method='GET', type='binary')
         if response is not None and len(response) > 0:
