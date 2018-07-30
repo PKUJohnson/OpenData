@@ -9,6 +9,6 @@
 
 import os
 
-__version__ = '0.5.7'
+__version__ = '0.5.8'
 SOURCE_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
