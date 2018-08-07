@@ -1,10 +1,8 @@
 # encoding = 'utf-8'
-from OpenData.opendatatools.index import *
+from opendatatools.index import *
 
 agent = YingWeiAgent()
-agent.set_proxies({"https": "https://127.0.0.1:1080"})
-agent.add_headers(
-    {'Referer': 'https://cn.investing.com/indices/shanghai-composite', 'X-Requested-With': 'XMLHttpRequest'})
+agent.add_headers({'Referer': 'https://cn.investing.com/indices/shanghai-composite', 'X-Requested-With': 'XMLHttpRequest'})
 
 time_map = {
     '1h' : 3600,
