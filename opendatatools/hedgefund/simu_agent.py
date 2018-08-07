@@ -92,8 +92,20 @@ class SimuAgent(RestAgent):
 
         return self.df_fundlist, ''
 
-    def _get_token(self, fund_id, page_no):
-        url = 'https://dc.simuwang.com/Api/getToken?id=%s' % fund_id
+    def _get_sign(self, url, params):
+        str = url
+        for k,v in params.items():
+            str = str + k + params[k]
+
+        sha1 = hashlib.sha1()
+        sha1.update(str.encode('utf8'))
+        sign = sha1.hexdigest()
+
+        return sign
+
+    def _get_token(self, fund_id):
+        sign = self._get_sign('https://dc.simuwang.com/Api/getToken', {'id' : fund_id})
+        url = 'https://dc.simuwang.com/Api/getToken?id=%s&sign=%s' % (fund_id, sign)
         self.add_headers({'Referer': 'https://dc.simuwang.com/'})
         response = self.do_request(url)
         if response is None:
@@ -111,7 +123,8 @@ class SimuAgent(RestAgent):
         salt = jsonobj['data']
 
         muid = self.user_info['userid']
-        str = 'id%smuid%spage%s%s' % (fund_id, muid, page_no, salt)
+        #str = 'id%smuid%spage%s%s' % (fund_id, muid, page_no, salt)
+        str = '%s%s' % (fund_id, salt)
         sha1 = hashlib.sha1()
         sha1.update(str.encode('utf8'))
         token = sha1.hexdigest()
@@ -120,7 +133,7 @@ class SimuAgent(RestAgent):
 
     def _get_fund_nav_page(self, fund_id, page_no):
         muid = self.user_info['userid']
-        token, msg = self._get_token(fund_id, page_no)
+        token, msg = self._get_token(fund_id)
         if token is None:
             return None, '获取token失败: ' + msg
 
@@ -146,6 +159,19 @@ class SimuAgent(RestAgent):
         df = pd.DataFrame(jsonobj['data'])
         pageinfo = jsonobj['pager']
         return df, '', pageinfo
+
+    def _bit_encrypt(self, str, key):
+        cryText = ''
+        keyLen = len(key)
+        strLen = len(str)
+        for i in range(strLen):
+            k = i % keyLen
+            cryText = cryText + chr(ord(str[i]) - k)
+
+        return cryText
+
+    def _decrypt_data(self, str):
+        return self._bit_encrypt(str, 'cd0a8bee4c6b2f8a91ad5538dde2eb34')
 
     def get_fund_nav(self, fund_id):
 
@@ -182,9 +208,11 @@ class SimuAgent(RestAgent):
         df_nav.rename(columns={'d': 'date', 'n': 'nav', 'cn' : 'accu_nav', 'cnw' : 'accu_nav_w'}, inplace=True)
 
         # 这个网站搞了太多的小坑
-        df_nav['nav'] = df_nav['nav'].apply(lambda x : float(x))
-        df_nav['nav'] = df_nav['nav'] - df_nav.index * 0.01 - 0.01
-        df_nav['accu_nav'] = df_nav['accu_nav'].apply(lambda x: float(x) - 0.01)
-        df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x: float(x) - 0.02)
+        df_nav['nav']         = df_nav['nav'].apply(lambda x : self._decrypt_data(x))
+        df_nav['accu_nav']   = df_nav['accu_nav'].apply(lambda x : self._decrypt_data(x))
+        df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x : self._decrypt_data(x))
+        #df_nav['nav'] = df_nav['nav'] - df_nav.index * 0.01 - 0.01
+        #df_nav['accu_nav'] = df_nav['accu_nav'].apply(lambda x: float(x) - 0.01)
+        #df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x: float(x) - 0.02)
 
         return df_nav, ''
