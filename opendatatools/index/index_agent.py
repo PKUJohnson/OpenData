@@ -55,7 +55,7 @@ index_map_inv = {v:k for k, v in index_map.items()}
 class YingWeiAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
-		self.add_headers({'Referer': 'https://cn.investing.com/indices/shanghai-composite', 'X-Requested-With': 'XMLHttpRequest'})
+        self.add_headers({'Referer': 'https://cn.investing.com/indices/shanghai-composite', 'X-Requested-With': 'XMLHttpRequest'})
 
     def get_index_list(self):
         url = "https://cn.investing.com/indices/major-indices"
