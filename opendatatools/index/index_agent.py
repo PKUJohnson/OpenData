@@ -71,7 +71,6 @@ class YingWeiAgent(RestAgent):
                 for tr in trs:
                     if tr.has_attr('id'):
                         tds = tr.findAll('td')[2:]
-                        print(int(tds[5]['data-value']))
                         time = datetime.datetime.fromtimestamp(int(tds[5]['data-value'])).strftime("%Y-%m-%d %H:%M:%S")
                         data_list.append({'index_name_cn': tr.a.text,
                                           'index_name': index_map_inv[tr.a.text],
