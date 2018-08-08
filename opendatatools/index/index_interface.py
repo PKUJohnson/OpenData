@@ -2,7 +2,6 @@
 from opendatatools.index import *
 
 agent = YingWeiAgent()
-agent.add_headers({'Referer': 'https://cn.investing.com/indices/shanghai-composite', 'X-Requested-With': 'XMLHttpRequest'})
 
 time_map = {
     '1h' : 3600,
@@ -27,6 +26,8 @@ def get_index_list():
     df, msg = agent.get_index_list()
     return df, msg
 
+def set_proxies(proxies):
+    return agent.set_proxies(proxies)
 
 
 

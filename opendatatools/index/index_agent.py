@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import datetime
 
+
 index_map={
     'SSEC'      :   '上证指数',
     'SZSC1'     :   '深证成份指数',
@@ -66,10 +67,21 @@ class YingWeiAgent(RestAgent):
         data_list = []
         for table in tables:
             if table.has_attr('id') and table['id'] == 'cr_12':
-                hrefs = table.findAll("a")
-                for href in hrefs:
-                    data_list.append({'指数名称' : href.text,
-                                      '指数简称': index_map_inv[href.text]})
+                trs = table.findAll("tr")
+                for tr in trs:
+                    if tr.has_attr('id'):
+                        tds = tr.findAll('td')[2:]
+                        print(int(tds[5]['data-value']))
+                        time = datetime.datetime.fromtimestamp(int(tds[5]['data-value'])).strftime("%Y-%m-%d %H:%M:%S")
+                        data_list.append({'index_name_cn': tr.a.text,
+                                          'index_name': index_map_inv[tr.a.text],
+                                          'last': tds[0].text,
+                                          'high': tds[1].text,
+                                          'low': tds[2].text,
+                                          'price_change': tds[3].text,
+                                          'percent_change': tds[4].text,
+                                          'time' : time,
+                                          })
         df = pd.DataFrame(data_list)
         return df, ''
 
@@ -113,4 +125,5 @@ class YingWeiAgent(RestAgent):
             return df, ''
         else:
             return None, 'error, no data'
+
 
