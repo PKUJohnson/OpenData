@@ -104,6 +104,8 @@ def get_dividend(symbol):
         code = temp[0]
         if market == 'SH':
             return shex_agent.get_dividend(code)
+        if market == 'SZ':
+            return cninfo_agent.get_dividend(code)
 
 def get_quote(symbols):
     return xq_agent.get_quote(symbols)
@@ -264,3 +266,5 @@ def get_hist_money_flow_market():
     return eastmoney_agent.get_hist_money_flow_market()
 def get_allstock_flow():
     return eastmoney_agent.get_allstock_flow()
+
+

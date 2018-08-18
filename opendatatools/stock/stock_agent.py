@@ -10,6 +10,18 @@ import io
 from opendatatools.futures.futures_agent import _concat_df
 import zipfile
 
+def time_map(x):
+    if x == '':
+        return ''
+    else:
+        return datetime.datetime.strptime(x, '%Y%m%d').strftime('%Y-%m-%d')
+
+def plan_map(x):
+    if '派' not in x:
+        return 0
+    else:
+        return '%.3f' % (float(x.split('派')[-1].split('元')[0])/10)
+
 class SHExAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
@@ -94,7 +106,6 @@ class SHExAgent(RestAgent):
             return df_total, df_detail
         else:
             return None, None
-
 
 class SZExAgent(RestAgent):
     def __init__(self):
@@ -640,6 +651,46 @@ class CNInfoAgent(RestAgent):
                 break
 
         return pd.DataFrame(data), ""
+
+    def get_dividend(self, symbol):
+        symbol = symbol[:6]
+        url = "http://www.cninfo.com.cn/information/dividend/szmb%s.html"
+        response = self.do_request(url % symbol, method='GET', encoding='gbk')
+        if response is None:
+            return pd.DataFrame([])
+        soup = BeautifulSoup(response, 'html5lib')
+        # get name_cn
+        tds = soup.find_all('td')
+        for td in tds:
+            if td.has_attr('style') and 'padding-right:10px' in td['style']:
+                name_cn = td.text.split('：')[-1]
+
+        #get dividend_data
+        divs = soup.find_all('div')
+        for div in divs:
+            if div.has_attr('class') and 'clear' in div['class']:
+                trs = div.find_all('tr')
+                if trs == []:
+                    continue
+                data_list = []
+                for tr in trs[1:]:
+                    data = [symbol, name_cn]
+                    tds = tr.find_all('td')
+                    for td in tds:
+                        text = td.text.replace(' ', '').replace('\n', '').replace('\xa0', '')
+                        data.append(text)
+                    data_list.append(data)
+                df_res = pd.DataFrame(data_list, columns=['股票代码', '公司名称', '分红年度', '分红方案', '股权登记日',
+                                                      '除权日', '红股上市日'])
+                df_res['股权登记日'] = df_res['股权登记日'].map(time_map)
+                df_res['除权日'] = df_res['除权日'].map(time_map)
+                df_res['分红方案'] = df_res['分红方案'].map(plan_map)
+                df_res['税后股利'] = df_res['分红方案'].map(lambda x: 0.8 * float(x))
+                df_res['公司代码'] = df_res['股票代码']
+                df = df_res[['公司代码', '股权登记日', '分红方案', '税后股利', '除权日', '公司名称', '股票代码']]
+                df.columns = ['COMPANY_CODE', 'DIVIDEND_DATE', 'DIVIDEND_PER_SHARE1_A',
+                             'DIVIDEND_PER_SHARE2_A', 'EX_DIVIDEND_DATE_A','SECURITY_ABBR_A',  'SECURITY_CODE_A']
+                return df
 
 class EastMoneyAgent(RestAgent):
     def __init__(self):
