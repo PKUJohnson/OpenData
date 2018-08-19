@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from .anjuke_agent import AnjukeAgent
+from .anjuke_agent import AnjukeAgent, anjuke_city_map
 from .lianjia_agent import LianjiaAgent
 
 anjuke_agent  = AnjukeAgent()
@@ -30,7 +30,7 @@ def get_esf_list_lianjia(city, max_page_no=10):
 
     return lianjia_agent.get_esf_list(city, max_page_no)
 
-def get_esf_list_by_distinct_lianjia(city, district, max_page_no=10):
+def get_esf_list_by_district_lianjia(city, district, max_page_no=10):
     city_list = lianjia_agent.get_city_list()
     if city not in city_list:
         msg = "invalid city, please use " + ".".join(city_list)
@@ -42,3 +42,10 @@ def get_esf_list_by_distinct_lianjia(city, district, max_page_no=10):
         return None, msg
 
     return lianjia_agent.get_esf_list_by_district(city, district, max_page_no)
+
+def get_rent(city, page_no):
+    if city in anjuke_city_map.keys():
+        city = anjuke_city_map[city]
+        return anjuke_agent.get_rent(city, page_no)
+    else:
+        return None, '暂不支持该城市'

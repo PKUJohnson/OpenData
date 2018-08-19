@@ -4,7 +4,30 @@ from opendatatools.common import RestAgent
 from bs4 import BeautifulSoup
 import pandas as pd
 import json
-
+anjuke_city_map = {
+    '北京' : 'bj',
+    '上海' : 'sh',
+    '杭州' : 'hz',
+    '广州' : 'gz',
+    '深圳' : 'sz',
+    '厦门' : 'xm',
+    '苏州' : 'su',
+    '重庆' : 'cq',
+    '长沙' : 'cs',
+    '海口' : 'hk',
+    '合肥' : 'hf',
+    '济南' : 'jn',
+    '青岛' : 'qd',
+    '南京' : 'nj',
+    '石家庄': 'sjz',
+    '沈阳' : 'sy',
+    '天津' : 'tj',
+    '武汉' : 'wh',
+    '无锡' : 'wx',
+    '西安' : 'xa',
+    '珠海' : 'zh',
+    '郑州' : 'zz',
+}
 class AnjukeAgent(RestAgent):
     def __init__(self):
         RestAgent.__init__(self)
@@ -66,4 +89,33 @@ class AnjukeAgent(RestAgent):
         df = pd.DataFrame({'date': list_date, 'price': list_price})
         df['city'] = city
         return df, ''
+
+    def get_rent(self, city, page_no):
+
+        url = "https://%s.zu.anjuke.com/p%s/" % (city, page_no)
+        response = self.do_request(url, encoding='utf-8')
+        soup = BeautifulSoup(response, 'html5lib')
+        divs = soup.find_all('div')
+        data_list = []
+        for div in divs:
+            if div.has_attr('class') and 'zu-itemmod' in div['class']:
+                title = div.find_all('h3')[0].a.text
+                row1 = div.find_all('p')[0].text.split('|')
+                type = row1[0].replace('\n', '').replace(' ', '')
+                area = row1[1].replace('\n', '').replace(' ', '')
+                height = row1[2].split('层')[0]
+
+                row2 = div.find_all('p')[1].text.replace(' ', '').split('\n')
+                part = row2[1]
+                direction = row2[2]
+                trans = row2[3]
+                price = div.find_all('p')[2].text
+                row3 = div.find_all('address')[0].text.split('\n')
+                addr = row3[2]
+                location = row3[1]
+                data_list.append([type, area, height, part, direction, trans, price, addr, location, title])
+        column = ['shape', 'area', 'floor', 'part', 'direction', 'trans', 'price', 'name', 'location', 'title']
+        df = pd.DataFrame(data_list, columns=column)
+        return df, ''
+
 
