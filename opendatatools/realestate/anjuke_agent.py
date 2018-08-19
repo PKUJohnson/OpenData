@@ -99,22 +99,25 @@ class AnjukeAgent(RestAgent):
         data_list = []
         for div in divs:
             if div.has_attr('class') and 'zu-itemmod' in div['class']:
-                title = div.find_all('h3')[0].a.text
-                row1 = div.find_all('p')[0].text.split('|')
-                type = row1[0].replace('\n', '').replace(' ', '')
-                area = row1[1].replace('\n', '').replace(' ', '')
-                height = row1[2].split('层')[0]
+                try:
+                    title = div.find_all('h3')[0].a.text
+                    row1 = div.find_all('p')[0].text.split('|')
+                    type = row1[0].replace('\n', '').replace(' ', '')
+                    area = row1[1].replace('\n', '').replace(' ', '')
+                    height = row1[2].split('层')[0]
 
-                row2 = div.find_all('p')[1].text.replace(' ', '').split('\n')
-                part = row2[1]
-                direction = row2[2]
-                trans = row2[3]
-                price = div.find_all('p')[2].text
-                row3 = div.find_all('address')[0].text.split('\n')
+                    row2 = div.find_all('p')[1].text.replace(' ', '').split('\n')
+                    part = row2[1]
+                    direction = row2[2]
+                    trans = row2[3]
+                    price = div.find_all('p')[2].text
+                    row3 = div.find_all('address')[0].text.split('\n')
 
-                location = row3[1].replace(' ', '')
-                addr = row3[2].replace(' ', '').split(r"\\")[0]
-                data_list.append([type, area, height, part, direction, trans, price, addr, location, title])
+                    addr = row3[1].replace(' ', '')
+                    location = row3[2].replace(' ', '').split(r"\\")[0]
+                    data_list.append([type, area, height, part, direction, trans, price, addr, location, title])
+                except:
+                    print('error occurs on this item')
         return data_list, ''
 
 
