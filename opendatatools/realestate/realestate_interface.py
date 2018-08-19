@@ -2,6 +2,7 @@
 
 from .anjuke_agent import AnjukeAgent, anjuke_city_map
 from .lianjia_agent import LianjiaAgent
+import pandas as pd
 
 anjuke_agent  = AnjukeAgent()
 lianjia_agent = LianjiaAgent()
@@ -46,6 +47,13 @@ def get_esf_list_by_district_lianjia(city, district, max_page_no=10):
 def get_rent(city, page_no):
     if city in anjuke_city_map.keys():
         city = anjuke_city_map[city]
-        return anjuke_agent.get_rent(city, page_no)
+        column = ['shape', 'area', 'floor', 'part', 'direction', 'trans', 'price', 'name', 'location', 'title']
+        data_all = []
+        for i in range(page_no):
+            print('get data from page %s' % (i+1))
+            data_list, msg = anjuke_agent.get_rent(city, i+1)
+            data_all.extend(data_list)
+        df = pd.DataFrame(data_all, columns=column)
+        return df, ''
     else:
         return None, '暂不支持该城市'

@@ -111,11 +111,10 @@ class AnjukeAgent(RestAgent):
                 trans = row2[3]
                 price = div.find_all('p')[2].text
                 row3 = div.find_all('address')[0].text.split('\n')
-                addr = row3[2]
-                location = row3[1]
+
+                location = row3[1].replace(' ', '')
+                addr = row3[2].replace(' ', '').split(r"\\")[0]
                 data_list.append([type, area, height, part, direction, trans, price, addr, location, title])
-        column = ['shape', 'area', 'floor', 'part', 'direction', 'trans', 'price', 'name', 'location', 'title']
-        df = pd.DataFrame(data_list, columns=column)
-        return df, ''
+        return data_list, ''
 
 

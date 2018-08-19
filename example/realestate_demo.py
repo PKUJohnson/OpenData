@@ -38,5 +38,5 @@ if __name__ == '__main__':
     #df, msg = realestate.get_real_house_price('北京')
     #print(df)
 
-    df, msg = realestate.get_rent('郑州', page_no=1)
+    df, msg = realestate.get_rent('上海', page_no=50)
     print(df)
