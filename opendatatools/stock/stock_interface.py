@@ -196,7 +196,7 @@ def get_daily(symbol, start_date, end_date):
 
         timestamp = curr_datetime.timestamp()
         df, msg = xq_agent.get_kline(symbol, int(timestamp*1000), 'day', 100)
-        if df is not None:
+        if len(df) != 0:
             df_result.append(df[df['time']<next_time])
 
         curr_date = next_date
