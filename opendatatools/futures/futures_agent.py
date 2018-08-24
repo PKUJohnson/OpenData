@@ -8,6 +8,22 @@ import io
 import re
 from xml.etree import ElementTree
 
+SHF_name_map = {"CJ1": "成交量",
+                   "CJ1_CHG": "成交量增减",
+                   "PARTICIPANTABBR1": "成交量期货公司",
+                   "CJ2": "持买仓量",
+                   "CJ2_CHG": "持买仓量增减",
+                   "PARTICIPANTABBR2": "持买仓量期货公司",
+                   "CJ3": "持卖仓量",
+                   "CJ3_CHG": "持卖仓量增减",
+                   "PARTICIPANTABBR3": "持卖仓量期货公司",
+                   "RANK": "名次",
+                   "INSTRUMENTID": "symbol",
+                   }
+
+CFE_list1 = ['instrumentid', 'datatypeid', 'rank', 'shortname', 'volume', 'varvolume']
+CFE_list2 = ['instrumentId', 'dataTypeId', 'rank', 'shortname', 'volume', 'varVolume']
+
 def format_field(x):
     if type(x) == str:
         return x.replace('\n', '').strip()
@@ -52,8 +68,10 @@ class SHFAgent(RestAgent):
 
         if code != 0:
             return None, msg
-
-        date = rsp['report_date']
+        if 'report_date' in rsp.keys():
+            date = rsp['report_date']
+        else:
+            date = date_convert(date, '%Y-%m-%d', "%Y%m%d")
         records = rsp['o_cursor']
 
         df = pd.DataFrame(records)
@@ -64,18 +82,8 @@ class SHFAgent(RestAgent):
 
         df['RANK'] = df['RANK'].apply(lambda x: int(x))
         df = df[(df['RANK']>0) & (df['RANK']<=20)]
-        df.rename(columns={"CJ1": "成交量"}, inplace=True)
-        df.rename(columns={"CJ1_CHG": "成交量增减"}, inplace=True)
-        df.rename(columns={"PARTICIPANTABBR1": "成交量期货公司"}, inplace=True)
-        df.rename(columns={"CJ2": "持买仓量"}, inplace=True)
-        df.rename(columns={"CJ2_CHG": "持买仓量增减"}, inplace=True)
-        df.rename(columns={"PARTICIPANTABBR2": "持买仓量期货公司"}, inplace=True)
-        df.rename(columns={"CJ3": "持卖仓量"}, inplace=True)
-        df.rename(columns={"CJ3_CHG": "持卖仓量增减"}, inplace=True)
-        df.rename(columns={"PARTICIPANTABBR3": "持卖仓量期货公司"}, inplace=True)
-        df.rename(columns={"RANK": "名次"}, inplace=True)
-        df.rename(columns={"INSTRUMENTID": "symbol"}, inplace=True)
-        df.drop(['PARTICIPANTID1', 'PARTICIPANTID2', 'PARTICIPANTID3', 'PRODUCTNAME', 'PRODUCTSORTNO'], axis=1, inplace=True)
+        df.rename(columns=SHF_name_map, inplace=True)
+        df = df[list(SHF_name_map.values())]
 
         return df, ""
 
@@ -90,15 +98,21 @@ class DCEAgent(RestAgent):
     3		兴证期货	12,835		4,405		
     4		西南期货	11,054		6,614		
     '''
-    def _parse_trade_file(self, file):
+    def _parse_trade_file(self, file, date):
         filename = file.name.encode('cp437').decode('gbk')
         name_items = filename.split("_")
         symbol = name_items[1]
 
         lines = file.readlines()
         df_list = []
+
+        if date >'2015-12-31':
+            charset = 'utf-8'
+        else:
+            charset = 'gbk'
+
         for i in range(len(lines)):
-            items = lines[i].decode('utf8').split()
+            items = lines[i].decode(charset).split()
             if len(items) == 4 and items[0] == '名次':
                 head = items
                 head[1] = head[2] + head[1]
@@ -106,8 +120,12 @@ class DCEAgent(RestAgent):
                 data = []
                 for j in range(20):
                     i = i + 1
-                    items = lines[i].decode('utf8').split()
+                    items = lines[i].decode(charset).split()
+                    if items[0] == '总计':
+                        break
                     data.append(items)
+                if data == []:
+                    data.append(['', '', '', ''])
                 df = pd.DataFrame(data)
                 df.columns = head
                 df.set_index('名次', inplace=True)
@@ -133,7 +151,7 @@ class DCEAgent(RestAgent):
         df_list = []
         for finfo in zip_ref.infolist():
             file = zip_ref.open(finfo, 'r')
-            df = self._parse_trade_file(file)
+            df = self._parse_trade_file(file, date)
             df_list.append(df)
 
         df_result = _concat_df(df_list)
@@ -156,6 +174,17 @@ class CZCAgent(RestAgent):
     3     |徽商期货      |66,887      |-29,680   |招商期货      |17,302    |-3,063    |招商期货      |20,519    |-2,788    
     4     |光大期货      |66,322      |-10,134   |永安期货      |17,193    |784       |中信期货      |15,779    |716       
     '''
+    def _get_url_by_date(self, date):
+        year, month, day = split_date(date, '%Y-%m-%d')
+        date_int = int(date_convert(date, '%Y-%m-%d', "%Y%m%d"))
+        url = 'http://old.czce.com.cn/portal/DFSStaticFiles/Future/%d/%d/FutureDataHolding.txt'
+        url_old = 'http://old.czce.com.cn/portal/exchange/%d/datatradeholding/%d.txt'
+
+        if date < '2015-10-01':
+            return url_old % (year, date_int)
+        else:
+            return url % (year, date_int)
+
     def _get_code(self, text):
         items = re.split("：| |\t|\r\n|", text)
         return items[1]
@@ -170,10 +199,25 @@ class CZCAgent(RestAgent):
         items[9] = '持卖仓量增减'
         return items
 
-    def _get_data(self, lines):
+    def _get_head_old(self, text):
+        items = ['名次', '成交量期货公司', '成交量', '成交量增减', '持买仓量期货公司', '持买仓量', '持买仓量增减', '持卖仓量期货公司', '持卖仓量', '持卖仓量增减']
+        return items
+
+    def get_head(self, text, old):
+        if old == True:
+            return self._get_head_old(text)
+        else:
+            return self._get_head(text)
+
+    def _get_data(self, lines, old):
+        if old == True:
+            sep = ','
+        else:
+            sep = '|'
+
         data = []
         for line in lines:
-            items = self._split_field(line)
+            items = self._split_field(line, splitter=sep)
             data.append(items)
         return data
 
@@ -182,32 +226,64 @@ class CZCAgent(RestAgent):
         result = [str(x).strip().replace('\r\n', '') for x in items]
         return result
 
-    def _parse_trade_file(self, file):
+    def _parse_trade_file_old(self, file):
         lines = file.readlines()
         df_list = []
         for i in range(len(lines)):
-            items = self._split_field(lines[i])
-            if len(items) == 10 and items[0] == '名次':
-                code = self._get_code(lines[i-1])
-                heads = self._get_head(lines[i])
-                data  = self._get_data(lines[i+1:i+20])
-
+            items = self._split_field(lines[i], splitter = ',')
+            if items[0][0:2] == '合约':
+                code = self._get_code(lines[i])
+                heads = self.get_head(lines[i], old=True)
+                a = i
+                while True:
+                    a += 1
+                    items = self._split_field(lines[a], splitter=',')
+                    # print(items)
+                    if items[0] == '合计':
+                        data = self._get_data(lines[i + 1:a + 1], old=True)
+                        break
                 df = pd.DataFrame(data)
                 df.columns = heads
                 df['symbol'] = remove_chinese(code)
                 df_list.append(df)
-
         df_result = _concat_df(df_list)
         return df_result
 
-    def get_trade_rank(self, date):
-        url = 'http://www.czce.com.cn/portal/DFSStaticFiles/Future/%d/%d/FutureDataHolding.txt'
-        year, month, day = split_date(date, '%Y-%m-%d')
-        date_int = int(date_convert(date, '%Y-%m-%d', "%Y%m%d"))
-        url = url % (year, date_int)
 
+    def _parse_trade_file(self, file):
+        lines = file.readlines()
+        df_list = []
+        for i in range(len(lines)):
+            items = self._split_field(lines[i], splitter='|')
+            if len(items) == 10 and items[0] == '名次':
+                code = self._get_code(lines[i-1])
+                heads = self.get_head(lines[i], old=False)
+                a = i
+                while True:
+                    a += 1
+                    items = self._split_field(lines[a], splitter='|')
+                    # print(items)
+                    if items[0] == '合计':
+                        data = self._get_data(lines[i + 1:a + 1], old=False)
+                        break
+                df = pd.DataFrame(data)
+                df.columns = heads
+                df['symbol'] = remove_chinese(code)
+                df_list.append(df)
+        df_result = _concat_df(df_list)
+        return df_result
+
+    def parse_trade_file(self, file, date):
+        if date < '2015-10-01':
+            return  self._parse_trade_file_old(file)
+        else:
+            return self._parse_trade_file(file)
+
+
+    def get_trade_rank(self, date):
+        url = self._get_url_by_date(date)
         response = self.do_request(url, None, "GET", type='binary')
-        df = self._parse_trade_file(io.StringIO(response.decode('gbk')))
+        df = self.parse_trade_file(io.StringIO(response.decode('gbk')), date)
         df['date'] = date
         _rename_df(df)
 
@@ -218,6 +294,9 @@ class CFEAgent(RestAgent):
         RestAgent.__init__(self)
 
     def get_trade_rank(self, date):
+        if date < '2018-01-01':
+            print("CFE网站改版，暂不兼容旧版，目前此接口仅支持2018年以后数据获取")
+            return None, '网站改版，暂不兼容'
         products = ['T', 'IF', 'IC', 'IH', 'TF']
         df_list = []
         for product in products:
@@ -233,7 +312,6 @@ class CFEAgent(RestAgent):
         url = 'http://www.cffex.com.cn/sj/ccpm/%04d%02d/%02d/%s.xml'
         year, month, day = split_date(date, '%Y-%m-%d')
         url = url % (year, month, day, product)
-
         response = self.do_request(url, None, "GET")
         root = ElementTree.fromstring(response)
         data_list = []
@@ -259,7 +337,7 @@ class CFEAgent(RestAgent):
 
         df_list = []
         for type, name in datatype_map.items():
-            df_tmp = df[df['datatypeid'] == type]
+            df_tmp = df[df['datatypeid'] == type].copy()
             df_tmp['rank'] = df_tmp['rank'].apply(lambda x: int(x))
             df_tmp.rename(columns={"instrumentid" : "symbol"}, inplace=True)
             df_tmp.rename(columns={"rank" : "名次"}, inplace=True)
