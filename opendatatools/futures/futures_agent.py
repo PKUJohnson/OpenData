@@ -324,7 +324,6 @@ class CFEAgent(RestAgent):
                 if key in ['instrumentid', 'datatypeid', 'rank', 'shortname', 'volume', 'varvolume']:
                     data[key] = value
             data_list.append(data)
-
         df = pd.DataFrame(data_list)
 
         datatype_map = {
