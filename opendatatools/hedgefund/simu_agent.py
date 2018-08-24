@@ -2,8 +2,29 @@ from opendatatools.common import RestAgent, md5
 from progressbar import ProgressBar
 import json
 import pandas as pd
-import time
+import io
 import hashlib
+
+index_map = {
+    'Barclay_Hedge_Fund_Index'      : 'ghsndx',
+    'Convertible_Arbitrage_Index'   : 'ghsca',
+    'Distressed_Securities_Index'   : 'ghsds',
+    'Emerging_Markets_Index'        : 'ghsem',
+    'Equity_Long_Bias_Index'        : 'ghselb',
+    'Equity_Long_Short_Index'       : 'ghsels',
+    'Equity_Market_Neutral_Index'   : 'ghsemn',
+    'European_Equities_Index'       : 'ghsee',
+    'Event_Driven_Index'            : 'ghsed',
+    'Fixed_Income_Arbitrage_Index'  : 'ghsfia',
+    'Fund_of_Funds_Index'           : 'ghsfof',
+    'Global_Macro_Index'            : 'ghsmc',
+    'Healthcare_&_Biotechnology_Index': 'ghsbio',
+    'Merger_Arbitrage_Index'        : 'ghsma',
+    'Multi_Strategy_Index'          : 'ghsms',
+    'Pacific_Rim_Equities_Index'    : 'ghspre',
+    'Technology_Index'              : 'ghstec',
+}
+
 
 class SimuAgent(RestAgent):
     def __init__(self):
@@ -216,3 +237,24 @@ class SimuAgent(RestAgent):
         #df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x: float(x) - 0.02)
 
         return df_nav, ''
+
+class BarclayAgent(RestAgent):
+    def __init__(self):
+        RestAgent.__init__(self)
+        self.add_headers({'Referer': 'https://www.barclayhedge.com/research/indices/ghs/Equity_Long_Short_Index.html'})
+        self.add_headers({'Content - Type': 'application / x - www - form - urlencoded'})
+
+    def get_data(self, index):
+        prog_cod = index_map[index]
+        url = "https://www.barclayhedge.com/cgi-bin/barclay_stats/ghsndx.cgi"
+        param = {
+            'dump': 'excel',
+            'prog_cod': prog_cod,
+            }
+        response = self.do_request(url, param=param, method='POST', type='binary')
+        if response is not None:
+            excel = pd.ExcelFile(io.BytesIO(response))
+            df = excel.parse('Sheet1').dropna(how='all').copy().reset_index().drop(0)
+            df.columns = ['year', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'YTD']
+            df = df.set_index('year')
+        return df, ''
