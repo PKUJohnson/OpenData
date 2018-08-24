@@ -61,14 +61,14 @@ class SWIndexAgent(RestAgent):
             for row in rows:
                 cols = row.findAll('td')
                 if (len(cols) >= 4):
-                    index_code = cols[0].text
-                    index_name = cols[1].text
+                    stock_code = cols[0].text
+                    stock_name = cols[1].text
                     weight     = cols[2].text
                     start_date = cols[3].text
 
                     data.append({
-                        'index_code': index_code,
-                        'index_name': index_name,
+                        'stock_code': stock_code,
+                        'stock_name': stock_name,
                         'start_date': start_date,
                         'weight'     : weight
                     })
