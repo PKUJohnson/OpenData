@@ -347,7 +347,6 @@ class XueqiuAgent(RestAgent):
         cookies = self.prepare_cookies('https://xueqiu.com/hq')
 
         response = self.do_request(url, data, cookies=cookies, method='GET')
-
         if response is not None:
             jsonobj = json.loads(response)
             if jsonobj['error_code'] == 0:
