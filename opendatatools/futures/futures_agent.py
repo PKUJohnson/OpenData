@@ -21,9 +21,6 @@ SHF_name_map = {"CJ1": "成交量",
                    "INSTRUMENTID": "symbol",
                    }
 
-CFE_list1 = ['instrumentid', 'datatypeid', 'rank', 'shortname', 'volume', 'varvolume']
-CFE_list2 = ['instrumentId', 'dataTypeId', 'rank', 'shortname', 'volume', 'varVolume']
-
 def format_field(x):
     if type(x) == str:
         return x.replace('\n', '').strip()
@@ -290,6 +287,7 @@ class CZCAgent(RestAgent):
         return df, ""
 
 class CFEAgent(RestAgent):
+
     def __init__(self):
         RestAgent.__init__(self)
 
@@ -349,7 +347,6 @@ class CFEAgent(RestAgent):
             df_list.append(df_tmp)
 
         return _merge_df(df_list)
-
 
 class SinaFuturesAgent(RestAgent):
     def __init__(self):
