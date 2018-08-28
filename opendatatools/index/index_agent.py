@@ -16,7 +16,7 @@ index_map={
     'SPX'       :   '标普500指数',
     'IXIC'      :   '纳斯达克综合指数',
     'RUT'       :   '美国小型股2000',
-    'VIX'       :   'S&P 500 VIX',
+    'VIX'       :   'VIX恐慌指数',
     'GSPTSE'    :   '多伦多S&P/TSX',
     'BVSP'      :   '巴西IBOVESPA',
     'MXX'       :   'S&P/BMV IPC',
@@ -49,6 +49,7 @@ index_map={
     'BSESN'      :   '印度BSE SENSEX',
     'HNX30'      :   'HNX 30',
     'CSE'      :   '斯里兰卡CSE',
+
 }
 
 index_map_inv = {v:k for k, v in index_map.items()}
