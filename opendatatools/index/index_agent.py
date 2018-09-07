@@ -49,7 +49,7 @@ index_map={
     'BSESN'      :   '印度BSE SENSEX',
     'HNX30'      :   'HNX 30',
     'CSE'      :   '斯里兰卡CSE',
-
+    'VIX'      :   'VIX恐慌指数',
 }
 
 index_map_inv = {v:k for k, v in index_map.items()}
