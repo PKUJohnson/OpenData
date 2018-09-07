@@ -6,7 +6,7 @@ import pytesseract
 import io
 import pandas as pd
 from bs4 import BeautifulSoup
-
+from datetime import datetime
 from opendatatools.common import RestAgent
 
 dict_commodity_spot_indicator = {
@@ -120,9 +120,10 @@ class SpotAgent(RestAgent):
     def get_commodity_spot_indicator_data(self, indicator_id):
         url = 'http://www.96369.net/indices/%s' % indicator_id
         captcha, cookies = self.get_captcha()
+        end_date = datetime.now().strftime('%Y-%m-%d')
         data = {
             'txtStartTime': '2000-01-01',
-            'txtEndTime': '2018-06-21',
+            'txtEndTime': end_date,
             'txtyzcode': captcha
         }
         response = self.do_request(url, param=data, cookies=cookies)
