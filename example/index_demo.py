@@ -6,11 +6,11 @@ from opendatatools import index
 if __name__ == '__main__':
     index.set_proxies({"https" : "https://127.0.0.1:1080"})
 
-    # È«Çò¹ÉÆ±Ö¸ÊıÁĞ±í
+    # å…¨çƒè‚¡ç¥¨æŒ‡æ•°åˆ—è¡¨
     df, msg = index.get_index_list()
     print(df)
 
-    # »ñÈ¡Ö¸ÊıÊı¾İ
-    # Ê±¼ä£º1h¡¢1d¡¢1w¡¢1m¡¢3m¡¢6m¡¢1y¡¢5y¡¢max
+    # è·å–æŒ‡æ•°æ•°æ®
+    # æ—¶é—´ï¼š1hã€1dã€1wã€1mã€3mã€6mã€1yã€5yã€max
     df, msd = index.get_index_data(symbol='SSEC', freq='1d', period='max')
     print(df)

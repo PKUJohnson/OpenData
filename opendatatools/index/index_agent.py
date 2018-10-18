@@ -71,15 +71,16 @@ class YingWeiAgent(RestAgent):
                 trs = table.findAll("tr")
                 for tr in trs:
                     if tr.has_attr('id'):
-                        tds = tr.findAll('td')[2:]
-                        time = datetime.datetime.fromtimestamp(int(tds[5]['data-value'])).strftime("%Y-%m-%d %H:%M:%S")
+                        tds = tr.findAll('td')
+                        time = datetime.datetime.fromtimestamp(int(tds[7]['data-value'])).strftime("%Y-%m-%d %H:%M:%S")
                         data_list.append({'index_name_cn': tr.a['title'],
                                           'index_name':  index_map_inv[tr.a['title']] if tr.a['title'] in index_map_inv else '',
-                                          'last': tds[0].text,
-                                          'high': tds[1].text,
-                                          'low': tds[2].text,
-                                          'price_change': tds[3].text,
-                                          'percent_change': tds[4].text,
+                                          'country' : tds[0].span['title'],
+                                          'last': tds[2].text,
+                                          'high': tds[3].text,
+                                          'low': tds[4].text,
+                                          'price_change': tds[5].text,
+                                          'percent_change': tds[6].text,
                                           'time' : time,
                                           })
         df = pd.DataFrame(data_list)
