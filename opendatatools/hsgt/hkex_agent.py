@@ -32,18 +32,13 @@ class HKExAgent(RestAgent):
         if date is None:
             date = today
 
-        search_date = datetime.datetime.strptime(date, "%Y-%m-%d")
-        year, month, day = search_date.year, search_date.month, search_date.day
-
         data = {
             'today' : date_convert(today, "%Y-%m-%d", "%Y%m%d"),
-            'ddlShareholdingDay' : "%02d" % day,
-            'ddlShareholdingMonth' : "%02d" % month,
-            'ddlShareholdingYear' : year,
-            'sortBy': '',
+            'sortBy': 'stockcode',
+            'sortDirection': 'asc',
             'alertMsg': '',
-            'btnSearch.x' : 23,
-            'btnSearch.y' : 5,
+            'txtShareholdingDate': date_convert(date, "%Y-%m-%d", "%Y/%m/%d"),
+            'btnSearch' : "搜寻",
         }
         aspx_param = self.get_aspx_param(url)
         data.update(aspx_param)
@@ -63,19 +58,20 @@ class HKExAgent(RestAgent):
         for div in divs:
             if div.has_attr('id') and 'pnlResult' in div['id']:
 
-                res_div = div.find_all('div')
-                if (len(res_div)) > 0:
-                    result_date = HKExAgent.clear_text(res_div[0].text)
-                    result_date = result_date.replace("持股日期: ", "").strip()
-                    result_date = date_convert(result_date, "%d/%m/%Y", "%Y-%m-%d")
+                res_span = div.find_all('span')
+
+                if (len(res_span)) > 0:
+                    result_date = HKExAgent.clear_text(res_span[0].text)
+                    result_date = result_date.replace("持股日期:", "").strip()
+                    result_date = date_convert(result_date, "%Y/%m/%d", "%Y-%m-%d")
                 rows = div.table.findAll('tr')
                 for row in rows:
                     cols = row.findAll('td')
                     if len(cols) == 4:
-                        code = HKExAgent.clear_text(cols[0].text)
-                        name = HKExAgent.clear_text(cols[1].text)
-                        share_num  = HKExAgent.clear_text(cols[2].text)
-                        percent = HKExAgent.clear_text(cols[3].text)
+                        code = HKExAgent.clear_text(cols[0].text.replace("股份代号:", ""))
+                        name = HKExAgent.clear_text(cols[1].text.replace("股份名称:", ""))
+                        share_num  = HKExAgent.clear_text(cols[2].text.replace("于中央结算系统的持股量:", ""))
+                        percent = HKExAgent.clear_text(cols[3].text.replace("占于深交所上市及交易的A股总数的百分比:", ""))
                         data.append({
                             "code": HKExAgent.process_code(market, code),
                             "name": name,

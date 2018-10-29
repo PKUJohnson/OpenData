@@ -22,8 +22,12 @@ def get_index_data(symbol, freq, period):
     return agent.get_index_data(symbol=symbol, period=period, interval=freq)
 
 
-def get_index_list():
-    df, msg = agent.get_index_list()
+def get_major_index_list():
+    df, msg = agent.get_major_index_list()
+    return df, msg
+
+def get_all_index_list():
+    df, msg = agent.get_all_index_list()
     return df, msg
 
 def set_proxies(proxies):

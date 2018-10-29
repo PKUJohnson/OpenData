@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import json
 import pandas as pd
 import datetime
+import re
 
 
 index_map={
@@ -50,6 +51,8 @@ index_map={
     'HNX30'      :   'HNX 30',
     'CSE'      :   '斯里兰卡科伦坡指数',
     'VIX'      :   'VIX恐慌指数 (CFD)',
+    'FTXIN41350': '富时中国A600行业指数 - 化工制品',
+
 }
 
 index_map_inv = {v:k for k, v in index_map.items()}
@@ -59,7 +62,7 @@ class YingWeiAgent(RestAgent):
         RestAgent.__init__(self)
         self.add_headers({'Referer': 'https://cn.investing.com/indices/shanghai-composite', 'X-Requested-With': 'XMLHttpRequest'})
 
-    def get_index_list(self):
+    def get_major_index_list(self):
         url = "https://cn.investing.com/indices/major-indices"
 
         response = self.do_request(url)
@@ -86,13 +89,52 @@ class YingWeiAgent(RestAgent):
         df = pd.DataFrame(data_list)
         return df, ''
 
+    def _get_symbol(self, link):
+        url = "https://cn.investing.com" + link
+        response = self.do_request(url)
+        soup = BeautifulSoup(response, "html5lib")
+        divs = soup.find_all("div")
+        for div in divs:
+            if div.has_attr("class") and "instrumentHead" in div["class"]:
+                text = div.h1.text
+                symbol = re.split("[()]", text)[1]
+                return symbol
+
+        return ""
+
+    def get_all_index_list(self):
+        url = "https://cn.investing.com/indices/world-indices?&majorIndices=on&primarySectors=on&additionalIndices=on&otherIndices=on"
+        response = self.do_request(url)
+        soup = BeautifulSoup(response, "html5lib")
+        tables = soup.find_all('table')
+        data = list()
+        for table in tables:
+            if (table.has_attr("id") and table["id"].startswith("indice_table_")):
+                rows = table.find_all("tr")
+                for row in rows:
+                    id = row["id"][5:]
+                    cols = row.find_all("td")
+                    if len(cols) <= 8:
+                        continue
+                    country = cols[0].span["title"]
+                    instname = cols[1].a["title"]
+                    url = cols[1].a["href"]
+                    symbol = self._get_symbol(url)
+
+                    item = {"country": country, "instname": instname, "symbol": symbol, "investing.com.id" : id}
+                    print(item)
+                    data.append(item)
+
+        df = pd.DataFrame(data)
+        return df, ''
+
     def _get_id(self, symbol):
-        url = "https://cn.investing.com/indices/major-indices"
+        url = "https://cn.investing.com/indices/world-indices?&majorIndices=on&primarySectors=on&additionalIndices=on&otherIndices=on"
         response = self.do_request(url)
         soup = BeautifulSoup(response, "html5lib")
         tables = soup.find_all('table')
         for table in tables:
-            if table.has_attr('id') and table['id'] == 'cr_12':
+            if table.has_attr('id') and table["id"].startswith("indice_table_"):
                 rows = table.findAll("tr")
                 for row in rows:
                     if row.has_attr('id'):
@@ -127,4 +169,25 @@ class YingWeiAgent(RestAgent):
         else:
             return None, 'error, no data'
 
-
+    def get_index_data(self, id):
+        url = "https://cn.investing.com/common/modules/js_instrument_chart/api/data.php"
+        param = {
+            'pair_id': id,
+            'pair_id_for_news': id,
+            'chart_type': 'area',
+            'pair_interval': interval,
+            'candle_count': 120,
+            'events': 'yes',
+            'volume_series': 'yes',
+            'period': period,
+        }
+        response = self.do_request(url, param=param, encoding='gzip')
+        if response is not None:
+            jsonobj = json.loads(response)
+            df = pd.DataFrame(jsonobj['candles'])
+            df.columns = ['time', 'close', '2', '3']
+            df = df[['time', 'close']]
+            df['time'] = df['time'].apply(lambda x: datetime.datetime.fromtimestamp(int(x) / 1000))
+            return df, ''
+        else:
+            return None, 'error, no data'
