@@ -71,7 +71,7 @@ class HKExAgent(RestAgent):
                         code = HKExAgent.clear_text(cols[0].text.replace("股份代号:", ""))
                         name = HKExAgent.clear_text(cols[1].text.replace("股份名称:", ""))
                         share_num  = HKExAgent.clear_text(cols[2].text.replace("于中央结算系统的持股量:", ""))
-                        percent = HKExAgent.clear_text(cols[3].text.replace("占于深交所上市及交易的A股总数的百分比:", ""))
+                        percent = HKExAgent.clear_text(cols[3].text.replace("占于深交所上市及交易的A股总数的百分比:", "")..replace("占于上交所上市及交易的A股总数的百分比:", ""))
                         data.append({
                             "code": HKExAgent.process_code(market, code),
                             "name": name,
