@@ -166,7 +166,7 @@ class SimuAgent(RestAgent):
             'page' : str(page_no),
             'token': token,
         }
-        response = self.do_request(url, param=data, cookies=self.cookies)
+        response = self.do_request(url, param=data, cookies=self.cookies, encoding="utf8")
         if response is None:
             return None, '获取数据失败', ''
 
@@ -187,12 +187,13 @@ class SimuAgent(RestAgent):
         strLen = len(str)
         for i in range(strLen):
             k = i % keyLen
-            cryText = cryText + chr(ord(str[i]) - k)
+            cryText = cryText + chr(ord(str[i]) ^ ord(key[k]))
 
         return cryText
 
     def _decrypt_data(self, str):
-        return self._bit_encrypt(str, 'cd0a8bee4c6b2f8a91ad5538dde2eb34')
+        #return self._bit_encrypt(str, 'cd0a8bee4c6b2f8a91ad5538dde2eb34')
+        return self._bit_encrypt(str, '937ab03370497f2b4e8d0599ad25c44c')
 
     def get_fund_nav(self, fund_id):
 
