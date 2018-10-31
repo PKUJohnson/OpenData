@@ -159,7 +159,7 @@ class SimuAgent(RestAgent):
             return None, '获取token失败: ' + msg
 
         url = 'https://dc.simuwang.com/fund/getNavList.html'
-        self.add_headers({'Referer': 'https://dc.simuwang.com/product/%s' % fund_id})
+        self.add_headers({'Referer': 'https://dc.simuwang.com/product/%s.html' % fund_id})
         data = {
             'id'   : fund_id,
             'muid' : muid,
@@ -187,13 +187,41 @@ class SimuAgent(RestAgent):
         strLen = len(str)
         for i in range(strLen):
             k = i % keyLen
+            cryText = cryText + chr(ord(str[i]) - k)
+
+        return cryText
+
+    def _bit_encrypt2(self, str, key):
+        cryText = ''
+        keyLen = len(key)
+        strLen = len(str)
+        for i in range(strLen):
+            k = i % keyLen
             cryText = cryText + chr(ord(str[i]) ^ ord(key[k]))
 
         return cryText
 
-    def _decrypt_data(self, str):
-        #return self._bit_encrypt(str, 'cd0a8bee4c6b2f8a91ad5538dde2eb34')
-        return self._bit_encrypt(str, '937ab03370497f2b4e8d0599ad25c44c')
+    def _decrypt_data(self, str, func, key):
+        # return self._bit_encrypt(str, 'cd0a8bee4c6b2f8a91ad5538dde2eb34')
+        # return self._bit_encrypt(str, '937ab03370497f2b4e8d0599ad25c44c')
+        # return self._bit_encrypt(str, '083975ce19392492bbccff21a52f1ace')
+        return func(str, key)
+
+    def _get_decrypt_info(self, fund_id):
+        url = 'https://dc.simuwang.com/product/%s.html' % fund_id
+        response = self.do_request(url, param=None, cookies=self.cookies, encoding="utf8")
+        if response is None:
+            return None, '获取数据失败', ''
+
+        if "String.fromCharCode(str.charCodeAt(i) - k)" in response:
+            decrypt_func = self._bit_encrypt
+        else:
+            decrypt_func = self._bit_encrypt2
+
+        tag = "return bitEncrypt(str, "
+        pos = response.index(tag) + len(tag) + 1
+        key = response[pos:pos+32]
+        return decrypt_func, key
 
     def get_fund_nav(self, fund_id):
 
@@ -230,9 +258,10 @@ class SimuAgent(RestAgent):
         df_nav.rename(columns={'d': 'date', 'n': 'nav', 'cn' : 'accu_nav', 'cnw' : 'accu_nav_w'}, inplace=True)
 
         # 这个网站搞了太多的小坑
-        df_nav['nav']         = df_nav['nav'].apply(lambda x : self._decrypt_data(x))
-        df_nav['accu_nav']   = df_nav['accu_nav'].apply(lambda x : self._decrypt_data(x))
-        df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x : self._decrypt_data(x))
+        func, key = self._get_decrypt_info(fund_id)
+        df_nav['nav']         = df_nav['nav'].apply(lambda x : self._decrypt_data(x, func, key))
+        df_nav['accu_nav']   = df_nav['accu_nav'].apply(lambda x : self._decrypt_data(x, func, key))
+        df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x : self._decrypt_data(x, func, key))
         #df_nav['nav'] = df_nav['nav'] - df_nav.index * 0.01 - 0.01
         #df_nav['accu_nav'] = df_nav['accu_nav'].apply(lambda x: float(x) - 0.01)
         #df_nav['accu_nav_w'] = df_nav['accu_nav_w'].apply(lambda x: float(x) - 0.02)
