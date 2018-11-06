@@ -10,7 +10,8 @@ class ChinaMoneyAgent(RestAgent):
 
     # cpr : central parity rate
     def get_hist_cny_cpr(self, start_date, end_date):
-        url = 'http://www.chinamoney.com.cn/dqs/rest/dqs-u-fx-base/CcprHisNew'
+        #url = 'http://www.chinamoney.com.cn/dqs/rest/dqs-u-fx-base/CcprHisNew'
+        url = 'http://www.chinamoney.com.cn/ags/ms/cm-u-bk-ccpr/CcprHisNew'
 
         data = {
             'startDate' : start_date,
