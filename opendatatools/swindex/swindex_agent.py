@@ -78,37 +78,55 @@ class SWIndexAgent(RestAgent):
 
         return None, '获取数据失败'
 
-    def get_index_daily(self, index_code):
-        url = 'http://222.73.228.238/chartdata/Day-K/%s.xml' % index_code
-        response = self.do_request(url, None, method='GET', type='text', encoding='utf8')
-        root = ElementTree.fromstring(response)
-        data = []
-        for dataElements in root:
-            open = dataElements.attrib['op']
-            high = dataElements.attrib['hp']
-            low = dataElements.attrib['lp']
-            close = dataElements.attrib['ep']
-            vol = dataElements.attrib['vol']
-            amount = dataElements.attrib['tot']
-            date = dataElements.attrib['tdd']
+    def get_index_daily(self, index_code, start_date, end_date):
+        url = 'http://www.swsindex.com/excel2.aspx?ctable=swindexhistory&where=%s '
+        where_cond = " swindexcode in ('%s') and BargainDate >= '%s' and BargainDate <= '%s'" % (index_code, start_date, end_date)
+        url = url % where_cond
+        print(url)
 
-            data.append({
-                'open': open,
-                'high': high,
-                'low': low,
-                'close': close,
-                'vol': vol,
-                'amount': amount,
-                'date': date
-            })
+        response = self.do_request(url, None, method='GET', type='text', encoding='utf8')
+        if response is None:
+            return None, '获取数据失败'
+
+        soup = BeautifulSoup(response, "html5lib")
+        data = []
+        table = soup.findAll('table')[0]
+        rows = table.findAll('tr')
+        for row in rows:
+            cols = row.findAll('td')
+            if (len(cols) >= 10):
+                index_code = cols[0].text
+                index_name = cols[1].text
+                date = cols[2].text
+                open = cols[3].text
+                high = cols[4].text
+                low = cols[5].text
+                close = cols[6].text
+                vol = cols[7].text
+                amount = cols[8].text
+                change_pct = cols[9].text
+
+                data.append({
+                    'index_code': index_code.replace(",", ""),
+                    'index_name': index_name.replace(",", ""),
+                    'date': date.replace(",", ""),
+                    'open': open.replace(",", ""),
+                    'high': high.replace(",", ""),
+                    'low': low.replace(",", ""),
+                    'close': close.replace(",", ""),
+                    'vol': vol.replace(",", ""),
+                    'amount': amount.replace(",", ""),
+                    'change_pct': change_pct.replace(",", ""),
+                })
 
         df = pd.DataFrame(data)
-        df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y%m%d'))
+        if len(df) > 0:
+            df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
         return df, ''
 
-    def get_index_dailyindicator(self, index_code, start_date, end_date):
+    def get_index_dailyindicator(self, index_code, start_date, end_date, type):
         url = 'http://www.swsindex.com/excel.aspx?ctable=V_Report&where=%s'
-        where_cond = "swindexcode in ('%s') and BargainDate >= '%s' and BargainDate <= '%s' and type='Day'" % (index_code, start_date, end_date)
+        where_cond = "swindexcode in ('%s') and BargainDate >= '%s' and BargainDate <= '%s' and type='%s'" % (index_code, start_date, end_date, type)
         url = url % where_cond
 
         response = self.do_request(url, None, method='GET', type='text', encoding='utf8')
@@ -132,6 +150,7 @@ class SWIndexAgent(RestAgent):
                 pe = cols[7].text
                 pb = cols[8].text
                 vwap = cols[9].text
+                turnover_pct = cols[10].text
                 float_mv = cols[11].text
                 avg_float_mv = cols[12].text
                 dividend_yield_ratio = cols[13].text
@@ -150,8 +169,10 @@ class SWIndexAgent(RestAgent):
                     'float_mv': float_mv,
                     'avg_float_mv': avg_float_mv,
                     'dividend_yield_ratio': dividend_yield_ratio,
+                    'turnover_pct' : turnover_pct
                 })
 
         df = pd.DataFrame(data)
-        df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
+        if len(df)>0:
+            df['date'] = df['date'].apply(lambda x: datetime.datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
         return df, ''

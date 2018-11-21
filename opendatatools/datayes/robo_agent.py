@@ -81,11 +81,11 @@ class RoboAgent(RestAgent):
 
         code, message = self._extract_result(response)
         if code is None or code != 1:
-            return False, "获取数据失败:" + message
+            return None, "获取数据失败:" + message
 
         data = self._extract_content(response, 'data')
         if data is None:
-            return False, "获取数据失败，没有返回data"
+            return None, "获取数据失败，没有返回data"
 
         df = pd.DataFrame(data['childData'])
         return df, ""
