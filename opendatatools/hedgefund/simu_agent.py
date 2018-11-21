@@ -85,7 +85,7 @@ class SimuAgent(RestAgent):
         return df, '', pageinfo
 
     def load_data(self):
-        page_no = 1
+        page_no = 0
         df_list = []
         df, msg, pageinfo = self._get_fund_list_page(page_no)
         if df is None:
@@ -156,7 +156,7 @@ class SimuAgent(RestAgent):
         muid = self.user_info['userid']
         token, msg = self._get_token(fund_id)
         if token is None:
-            return None, '获取token失败: ' + msg
+            return None, '获取token失败: ' + msg, ''
 
         url = 'https://dc.simuwang.com/fund/getNavList.html'
         self.add_headers({'Referer': 'https://dc.simuwang.com/product/%s.html' % fund_id})
@@ -228,7 +228,7 @@ class SimuAgent(RestAgent):
         if self.user_info is None:
             return None, '请先登录'
 
-        page_no = 1
+        page_no = 0
         df_list = []
         df, msg, pageinfo = self._get_fund_nav_page(fund_id, page_no)
         if df is None:
@@ -251,6 +251,7 @@ class SimuAgent(RestAgent):
                 else:
                     df_list.append(df)
                     break
+            print(page_no / page_count)
             page_no = page_no + 1
 
         df_nav = pd.concat(df_list)
@@ -287,4 +288,6 @@ class BarclayAgent(RestAgent):
             df = excel.parse('Sheet1').dropna(how='all').copy().reset_index().drop(0)
             df.columns = ['year', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'YTD']
             df = df.set_index('year')
-        return df, ''
+            return df, ''
+
+        return None, "获取数据失败"

@@ -73,7 +73,8 @@ class SWIndexAgent(RestAgent):
                         'weight'     : weight
                     })
             df = pd.DataFrame(data)
-            df['start_date'] = df['start_date'].apply(lambda x : datetime.datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
+            if len(df) > 0:
+                df['start_date'] = df['start_date'].apply(lambda x : datetime.datetime.strptime(x, '%Y/%m/%d %H:%M:%S'))
             return df, ''
 
         return None, '获取数据失败'
