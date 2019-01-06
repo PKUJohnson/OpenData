@@ -112,10 +112,10 @@ class YingWeiAgent(RestAgent):
             if (table.has_attr("id") and table["id"].startswith("indice_table_")):
                 rows = table.find_all("tr")
                 for row in rows:
-                    id = row["id"][5:]
                     cols = row.find_all("td")
                     if len(cols) <= 8:
                         continue
+                    id = row["id"][5:]
                     country = cols[0].span["title"]
                     instname = cols[1].a["title"]
                     url = cols[1].a["href"]
