@@ -115,13 +115,13 @@ class YingWeiAgent(RestAgent):
                     cols = row.find_all("td")
                     if len(cols) <= 8:
                         continue
-                    id = row["id"][5:]
+                    # id = row["id"][5:]
                     country = cols[0].span["title"]
                     instname = cols[1].a["title"]
                     url = cols[1].a["href"]
                     symbol = self._get_symbol(url)
 
-                    item = {"country": country, "instname": instname, "symbol": symbol, "investing.com.id" : id}
+                    item = {"country": country, "instname": instname, "symbol": symbol}#,, "investing.com.id" : id}
                     print(item)
                     data.append(item)
 
@@ -169,7 +169,7 @@ class YingWeiAgent(RestAgent):
         else:
             return None, 'error, no data'
 
-    def get_index_data(self, id):
+    def get_index_data_id(self, id):
         url = "https://cn.investing.com/common/modules/js_instrument_chart/api/data.php"
         param = {
             'pair_id': id,
