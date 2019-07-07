@@ -39,7 +39,7 @@ please see [wiki](https://github.com/PKUJohnson/OpenData/wiki)
 
 ## 小程序
 
-![](https://github.com/PKUJohnson/OpenData/blob/master/image/opendata.jpg)
+![](https://github.com/PKUJohnson/OpenData/blob/master/image/opendata_s.jpg)
 
 ## qq群讨论
 
