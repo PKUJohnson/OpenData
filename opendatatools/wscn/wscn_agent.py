@@ -35,46 +35,39 @@ class XuangubaoAgent(RestAgent):
             return False
 
     def get_theme(self):
-        url = "https://wows-api.wallstreetcn.com/v3/aioria/plates/rank?count=10000&is_asc=true&rank_type=core_pcp_rank"
+        url = "https://flash-api.xuangubao.cn/api/plate/rank?count=10000&is_asc=true&field=core_avg_pcp"
         response = self.do_request(url, method="GET")
         if response is not None:
             rsp = json.loads(response)
-            cols = rsp["data"]['fields']
-            items = rsp["data"]['items']
-            df = pd.DataFrame(items)
-            df.columns = cols
+            data = rsp["data"]
+            df = pd.DataFrame(data)
+            df.columns = ["plate_id"]
             return df, ""
         else:
             return None, "获取数据失败"
 
     def get_theme_stock(self, tid):
-        url = "https://wows-api.wallstreetcn.com/v3/aioria/sset/bankuaiji?id=%d&terminal=pc" % tid
+        url = "https://flash-api.xuangubao.cn/api/plate/plate_set?id=%s" % tid
         self.add_headers({
             "X-Appgo-Token" : self.token
         })
         response = self.do_request(url, method="GET")
         if response is not None:
             rsp = json.loads(response)
-            login_flag = rsp["data"]["login_flag"]
-            if login_flag == True:
-                stocks = rsp["data"]['stocks']
-                df = pd.DataFrame(stocks)
-                return df, ""
-            else:
-                return None, "请首先登录 login"
+            stocks = rsp["data"]['stocks']
+            df = pd.DataFrame(stocks)
+            return df, ""
         else:
             return None, "获取数据失败"
 
     def get_theme_kline(self, tid):
-        url = "https://wows-api.wallstreetcn.com/v3/aioria/index/kline?prod_code=%s&data_count=10000" % tid
+        url = "https://flash-api.xuangubao.cn/api/plate/index_history?plate_id=%s&index_type=1&data_count=10000" % tid
         response = self.do_request(url, method="GET")
         if response is not None:
             rsp = json.loads(response)
-            data = rsp["data"]["candle"][str(tid)]
-            cols = rsp["data"]["candle"]["fields"]
+            data = rsp["data"]
             df = pd.DataFrame(data)
-            df.columns = cols
-            df["min_time"] = df["min_time"].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime("%Y-%m-%d"))
+            df["date_time"] = df["date_time"].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime("%Y-%m-%d"))
             return df, ""
         else:
             return None, "获取数据失败"
