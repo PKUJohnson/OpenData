@@ -8,6 +8,7 @@ import hashlib
 import base64
 
 from opendatatools.common import RestAgent
+from bs4 import BeautifulSoup
 
 class AQIStudyAgent(RestAgent):
     def __init__(self):
@@ -58,8 +59,25 @@ class AQIStudyAgent(RestAgent):
             df.set_index("time_point", inplace=True)
         return df, ""
 
+    def get_city_list(self):
+        url = "https://www.aqistudy.cn/historydata/"
+        response = self.do_request(url, method="GET")
+
+        soup = BeautifulSoup(response, "html5lib")
+        links = soup.find_all('a')
+
+        data = {}
+        for link in links:
+            href = link["href"]
+            if href.startswith("monthdata.php?city="):
+                city = href.replace("monthdata.php?city=", "")
+                data[city] = city
+        return data
+
 if __name__ == '__main__':
     aqi = AQIStudyAgent()
-    df, msg = aqi.get_hist_daily_aqi('北京市','201805')
-    print(df)
-    print(msg)
+    city = aqi.get_city_list()
+    print(city)
+    #df, msg = aqi.get_hist_daily_aqi('北京市','201805')
+    #print(df)
+    #print(msg)
