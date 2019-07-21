@@ -9,6 +9,7 @@ if __name__ == '__main__':
     #print(df)
 
     df, msg = swindex.get_index_daily('801003', '2000-01-01', '2018-11-02')
+    df, msg = swindex.get_index_cons('801060')
     print(df)
 
 	# freq 'D', 'W', 'M'

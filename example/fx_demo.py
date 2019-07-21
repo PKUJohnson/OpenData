@@ -4,11 +4,11 @@ from opendatatools import fx
 
 if __name__ == '__main__':
     # 人民币汇率中间价历史数据
-    df,msg = fx.get_hist_cny_cpr(start_date='2016-01-01')
-    print(df.head(10))
+    #df,msg = fx.get_hist_cny_cpr(start_date='2016-01-01')
+    #print(df)
 
     # shibor历史数据
-    df, msg = fx.get_his_shibor(start_date='2016-01-01')
+    df, msg = fx.get_his_shibor(start_date='2011-01-01')
     print(df)
 
     # shibor实时数据
