@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
-from .aqi_interface import *
+from .aqi2_interface import *
 from .constant import *
+from .util import *
 
-__all__ = ['get_daily_aqi', 'get_daily_aqi_onecity', 'get_hour_aqi_onecity', 'get_hour_aqi', 'set_proxies']
+__all__ = ['get_hist_daily_aqi', 'set_proxies']
