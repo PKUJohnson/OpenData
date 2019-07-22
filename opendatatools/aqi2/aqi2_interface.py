@@ -15,3 +15,7 @@ def get_hist_daily_aqi(city, begindate, enddate):
 
 def get_daily_hour_aqi(city, date):
     return aqistudy_agent.get_daily_hour_aqi(city, date)
+
+def get_aqi_map(type, timepoint):
+    return aqistudy_agent.get_api_map(type, timepoint)
+

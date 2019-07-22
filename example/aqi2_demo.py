@@ -2,6 +2,15 @@
 
 from opendatatools import aqi2
 
+# 获取当前的aqi（所有城市）
+df, msg = aqi2.get_aqi_map("HOUR", "2019-07-22 08:00:00")
+print(df)
+
+# 获取某日的aqi（所有城市）
+df, msg = aqi2.get_aqi_map("HOUR", "2019-07-21")
+print(df)
+
+
 # 获取城市列表
 citylist = aqi2.get_city_list()
 print(citylist)

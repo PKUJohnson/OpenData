@@ -69,6 +69,51 @@ class AQIStudyAgent(RestAgent):
             df.set_index("time", inplace=True)
         return df, ""
 
+    # type : "DAY", "HOUR
+    def get_api_map(self, type, timepoint):
+        url = "https://www.aqistudy.cn/apinew/aqistudyapi.php"
+        appid = "1a45f75b824b2dc628d5955356b5ef18"
+        method = "GETMAPDATA"
+        timestamp = int(time.time() * 1000)
+        clienttype = "WEB"
+        object = {"type": type, "timepoint" : timepoint  }
+        secret_key = appid + method + str(timestamp) + clienttype + "{\"timepoint\":\"%s\",\"type\":\"%s\"}" % (
+            object["timepoint"], object["type"]
+        )
+        secret = hashlib.md5(secret_key.encode("utf8")).hexdigest()
+        param = {
+            "appId": appid,
+            "method": method,
+            "timestamp": timestamp,
+            "clienttype": clienttype,
+            "object": object,
+            "secret": secret
+        }
+
+        param = base64.standard_b64encode(json.dumps(param).encode("utf8")).decode()
+        param = aes_encrypt(real_aes_client_key, real_aes_client_iv, param)
+
+        response = self.do_request(url, param={"d" : param}, method="POST")
+        if response is None:
+            return None, "获取数据失败"
+
+        #data = base64.standard_b64decode(response.encode("utf8")).decode()
+        data = decrypt_response(real_des_key, real_des_iv, real_aes_server_key, real_aes_server_iv, response)
+
+        jsonobj = json.loads(data)
+        success = jsonobj["success"]
+        errcode = jsonobj["errcode"]
+        errmsg  = jsonobj["errmsg"]
+
+        if errcode != 0:
+            return None, errmsg
+
+        result = jsonobj["result"]["data"]["rows"]
+        df = pd.DataFrame(result)
+        if len(df) > 0:
+            df.set_index("time", inplace=True)
+        return df, ""
+
     def get_city_list(self):
         url = "https://www.aqistudy.cn/historydata/"
         response = self.do_request(url, method="GET")
@@ -89,10 +134,21 @@ if __name__ == '__main__':
     #city = aqi.get_city_list()
     #print(city)
 
-    df, msg = aqi.get_daily_hour_aqi('北京', '2019-07-22')
-    print(df)
+    #df, msg = aqi.get_daily_hour_aqi('北京', '2019-07-22')
+    #print(df)
     #print(msg)
 
     #df, msg = aqi.get_hist_daily_aqi('北京','2018-05-01', '2019-05-01')
     #print(df)
     #print(msg)
+
+    param = "tdgHOYxwKdDSgYXe+RLPzYCgLvrddahasI5XXklB4gVLYqab+XRPpMD/oSqnJ/aEmFwzVEUhLnPzRy03+X1BI7EP40t1A25axHw6XgQEwrMCA8LPhIJdpk3JqlHQwF/0lHvOCRXiksQ2gxlp8zXTAHX2NeaTAHQeAHVjfS2WSo59EEsCNxnpiBc9JH6WSot2V5FpFF1Z0ElMw4F5ts9OERUzyzCtS80roZmhfEN2sQMsQdt+8keJnsk56MDt1HG9THFJI56TYqd+cFcfcjv5UXDQqjBrttIwXzTYLmMVW0ALdQH4MsmIyMsxiHPYMsto6FJWs/7Jh3L3giRN0yVlF8mW73XSkAsiW/aCRcua8psHxI4f5lyG1a2owB5CZS/FMCM3OHeSvmebXVLrPfOeWA=="
+    result = aes_decrypt(real_aes_client_key, real_aes_client_iv, param)
+    result = base64.standard_b64decode(result).decode()
+    print(result)
+
+    #df, msg = aqi.get_real_aqi_map("HOUR", "2019-07-22 08:00:00")
+    #print(df)
+
+    df, msg = aqi.get_api_map("DAY", "2019-07-21")
+    print(df)
