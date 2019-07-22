@@ -7,7 +7,7 @@ df, msg = aqi2.get_aqi_map("HOUR", "2019-07-22 08:00:00")
 print(df)
 
 # 获取某日的aqi（所有城市）
-df, msg = aqi2.get_aqi_map("HOUR", "2019-07-21")
+df, msg = aqi2.get_aqi_map("DAY", "2019-07-21")
 print(df)
 
 
