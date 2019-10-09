@@ -66,7 +66,7 @@ class SimuAgent(RestAgent):
         return mtoken
 
     def _get_fund_list_page(self, page_no):
-        url = 'https://dc.simuwang.com/ranking/get?page=%s&condition=fund_type:1,6,4,3,8,2;ret:9;rating_year:1;istiered:0;company_type:1;sort_name:profit_col2;sort_asc:desc;' % page_no
+        url = 'https://dc.simuwang.com/ranking/get?page=%s&condition=fund_type:1,6,4,3,8,2;ret:9;rating_year:1;istiered:0;company_type:1;sort_name:profit_col2;sort_asc:desc;keyword:' % page_no
         response = self.do_request(url)
 
         if response is None:
@@ -85,7 +85,7 @@ class SimuAgent(RestAgent):
         return df, '', pageinfo
 
     def load_data(self):
-        page_no = 0
+        page_no = 1
         df_list = []
         df, msg, pageinfo = self._get_fund_list_page(page_no)
         if df is None:
@@ -96,7 +96,7 @@ class SimuAgent(RestAgent):
         process_bar = ProgressBar().start(max_value=page_count)
 
         page_no = page_no + 1
-        while page_no < page_count:
+        while page_no <= page_count:
             df, msg, pageinfo = self._get_fund_list_page(page_no)
             if df is None:
                 return None, msg
@@ -218,7 +218,10 @@ class SimuAgent(RestAgent):
         else:
             decrypt_func = self._bit_encrypt2
 
-        tag = "return bitEncrypt(str, "
+        if response.index("return xOrEncrypt(str, ")> 0:
+            tag = "return xOrEncrypt(str, "
+        else:
+            tag = "return bitEncrypt(str, "
         pos = response.index(tag) + len(tag) + 1
         key = response[pos:pos+32]
         return decrypt_func, key
@@ -228,7 +231,7 @@ class SimuAgent(RestAgent):
         if self.user_info is None:
             return None, '请先登录'
 
-        page_no = 0
+        page_no = 1
         df_list = []
         df, msg, pageinfo = self._get_fund_nav_page(fund_id, page_no)
         if df is None:
@@ -238,7 +241,7 @@ class SimuAgent(RestAgent):
         page_count = pageinfo['pagecount']
 
         page_no = page_no + 1
-        while page_no < page_count:
+        while page_no <= page_count:
             try_times = 1
             while try_times <= 3:
                 df, msg, pageinfo = self._get_fund_nav_page(fund_id, page_no)
@@ -251,7 +254,6 @@ class SimuAgent(RestAgent):
                 else:
                     df_list.append(df)
                     break
-            print(page_no / page_count)
             page_no = page_no + 1
 
         df_nav = pd.concat(df_list)
