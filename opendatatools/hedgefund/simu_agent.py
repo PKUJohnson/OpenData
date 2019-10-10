@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import io
 import hashlib
+import time
 
 index_map = {
     'Barclay_Hedge_Fund_Index'      : 'ghsndx',
@@ -218,7 +219,7 @@ class SimuAgent(RestAgent):
         else:
             decrypt_func = self._bit_encrypt2
 
-        if response.index("return xOrEncrypt(str, ")> 0:
+        if response.find("return xOrEncrypt(str, ")> 0:
             tag = "return xOrEncrypt(str, "
         else:
             tag = "return bitEncrypt(str, "
@@ -226,7 +227,7 @@ class SimuAgent(RestAgent):
         key = response[pos:pos+32]
         return decrypt_func, key
 
-    def get_fund_nav(self, fund_id):
+    def get_fund_nav(self, fund_id, time_elapse = 0):
 
         if self.user_info is None:
             return None, '请先登录'
@@ -255,6 +256,8 @@ class SimuAgent(RestAgent):
                     df_list.append(df)
                     break
             page_no = page_no + 1
+            if time_elapse > 0:
+                time.sleep(time_elapse)
 
         df_nav = pd.concat(df_list)
         df_nav.drop('c', axis=1, inplace=True)

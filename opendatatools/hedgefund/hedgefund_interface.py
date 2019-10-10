@@ -19,8 +19,8 @@ def load_data():
 def get_fund_list():
     return simu_agent.get_fund_list()
 
-def get_fund_nav(fund_id):
-    return simu_agent.get_fund_nav(fund_id)
+def get_fund_nav(fund_id, time_span = 0):
+    return simu_agent.get_fund_nav(fund_id, time_span)
 
 def get_barclay_data(index):
     return barclay_agent.get_data(index)

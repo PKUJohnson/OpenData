@@ -633,13 +633,13 @@ class NBSAgent(RestAgent):
         return self._get_qg_indicator('A01', 'A1A02', dbcode = 'hgyd')
 
     def get_manufacturing_pmi(self):
-        return self._get_qg_indicator('A01', 'A1901', dbcode = 'hgyd')
+        return self._get_qg_indicator('A01', 'A0B01', dbcode = 'hgyd')
 
     def get_non_manufacturing_pmi(self):
-        return self._get_qg_indicator('A01', 'A1902', dbcode = 'hgyd')
+        return self._get_qg_indicator('A01', 'A0B02', dbcode = 'hgyd')
 
     def get_pmi(self):
-        return self._get_qg_indicator('A01', 'A1903', dbcode = 'hgyd')
+        return self._get_qg_indicator('A01', 'A0B03', dbcode = 'hgyd')
 
     def get_import_export(self):
         return self._get_qg_indicator('A01', 'A1601', dbcode = 'hgyd')
