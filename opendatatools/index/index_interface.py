@@ -1,5 +1,5 @@
 # encoding = 'utf-8'
-from opendatatools.index import *
+from .index_agent import *
 
 agent = YingWeiAgent()
 

@@ -169,7 +169,7 @@ class YingWeiAgent(RestAgent):
         else:
             return None, 'error, no data'
 
-    def get_index_data(self, id):
+    def get_index_data_by_id(self, id):
         url = "https://cn.investing.com/common/modules/js_instrument_chart/api/data.php"
         param = {
             'pair_id': id,
