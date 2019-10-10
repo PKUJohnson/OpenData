@@ -40,9 +40,16 @@ class XuangubaoAgent(RestAgent):
         if response is not None:
             rsp = json.loads(response)
             data = rsp["data"]
-            df = pd.DataFrame(data)
-            df.columns = ["plate_id"]
-            return df, ""
+            plates = ",".join([str(x) for x in data])
+            url_info = "https://flash-api.xuangubao.cn/api/plate/data?fields=core_avg_pcp,plate_name,plate_id&plates=%s" % plates
+
+            response_info = self.do_request(url_info, method="GET")
+            if response_info is not None:
+                rsp_info = json.loads(response_info)
+                info = rsp_info["data"]
+                df = pd.DataFrame(info).T
+                df.columns = ["core_avg_pcp", "plate_id", "plate_name"]
+                return df, ""
         else:
             return None, "获取数据失败"
 
