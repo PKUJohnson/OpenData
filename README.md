@@ -49,7 +49,6 @@ please see [wiki](https://github.com/PKUJohnson/OpenData/wiki)
 
 ## qq群讨论
 
-OpenDataTools群：768349056
 ![](https://github.com/PKUJohnson/OpenData/blob/master/image/OpenDataTools.png)
 
 ## 小程序
