@@ -3,6 +3,16 @@
 
 ![](https://github.com/PKUJohnson/OpenData/blob/master/image/logo.png)
 
+## 最近更新
+
+### 2019-10-10 ###
+
+修正issue里面的几个问题，包括：
+1. 选股宝主题名称问题
+2. 经济数据pmi获取失败的问题
+3. 全球指数获取失败的问题
+4. 私募基金数据获取失败的问题
+
 ## install
 
 声明：本工具只支持 **python3**，请安装python3.6以上版本。没有支持python2的计划。
