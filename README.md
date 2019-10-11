@@ -47,10 +47,10 @@ print(df)
 
 please see [wiki](https://github.com/PKUJohnson/OpenData/wiki)
 
+## qq群讨论
+
+OpenDataTools群：768349056
+
 ## 小程序
 
 ![](https://github.com/PKUJohnson/OpenData/blob/master/image/opendata_s.jpg)
-
-## qq群讨论
-
-![](https://github.com/quantOS-org/quantOSUserGuide/blob/master/assets/quantos-qq.jpg?raw=true)
