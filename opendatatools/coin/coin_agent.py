@@ -95,6 +95,13 @@ class CoinAgent(RestAgent):
 
         return data, message
 
+    def get_exchange_list(self):
+        data, message = self._fetch(self.ALL_EXCHANGES_URL)
+        if data is None:
+            return None, message
+
+        return pd.DataFrame(data.keys()), message
+
     def get_his_min(self, fsym, tsym, exchange, limit):
         data, message = self._fetch(self.HIST_MINUTE_URL + '?fsym=' + fsym + '&tsym=' + tsym + "&e=" + exchange + "&limit=" + str(limit))
         if data is None:

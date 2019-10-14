@@ -14,6 +14,9 @@ def get_coin_list():
 def get_coin_snapshot(fsym, tsym):
     return coin_agent.get_coin_snapshot(fsym, tsym)
 
+def get_exchange_list():
+    return coin_agent.get_exchange_list()
+
 def get_coin_price(fsym, tsym, exchange = "CCCAGG"):
     return coin_agent.get_coin_price(fsym, tsym, exchange)
 
