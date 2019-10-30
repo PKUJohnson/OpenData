@@ -34,7 +34,7 @@ class RestAgent():
                 if json is not None:
                     res = self.session.post(url, json=json, **kwargs)
                 else:
-                    res = self.session.post(url, data=param **kwargs)
+                    res = self.session.post(url, data=param, **kwargs)
         else:
             if method == "GET":
                 res = self.session.get(url, params=param, proxies=self.proxies, **kwargs)
