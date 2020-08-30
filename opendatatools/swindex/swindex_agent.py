@@ -81,7 +81,13 @@ class SWIndexAgent(RestAgent):
 
     def get_index_daily(self, index_code, start_date, end_date):
         url = 'http://www.swsindex.com/excel2.aspx?ctable=swindexhistory&where=%s '
-        where_cond = " swindexcode in ('%s') and BargainDate >= '%s' and BargainDate <= '%s'" % (index_code, start_date, end_date)
+        if isinstance(index_code, str):
+            where_cond = " swindexcode in ('%s') and BargainDate >= '%s' and BargainDate <= '%s'" % (index_code, start_date, end_date)
+        elif isinstance(index_code,list):
+            index_code_list = "','".join(index_code)
+            where_cond = " swindexcode in ('%s') and BargainDate >= '%s' and BargainDate <= '%s'" % (index_code_list, start_date, end_date)
+        else:
+            return None, 'Input Error:index_code should be a string or a list of string'
         url = url % where_cond
         print(url)
 
